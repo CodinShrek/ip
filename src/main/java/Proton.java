@@ -1,5 +1,8 @@
 import java.util.Scanner;
 
+/**
+ * Runs the Proton chatbot and manages the user's task list.
+ */
 public class Proton {
     public static void main(String[] args) {
         String banner = " ____            _              \n"
@@ -19,6 +22,7 @@ public class Proton {
         Scanner scanner = new Scanner(System.in);
 
         String[] tasks = new String[100];
+        boolean[] isDone = new boolean[100];
         int taskCount = 0;
 
         while (scanner.hasNextLine()) {
@@ -31,8 +35,25 @@ public class Proton {
                 System.out.println(SEPERATOR);
                 break;
             } else if (inputCommand.equals("list")) {
+                System.out.println(" Here are the tasks in your list:");
                 for (int i = 0; i < taskCount; i++) {
-                    System.out.println(" " + (i + 1) + ". " + tasks[i]);
+                    String statusIcon = isDone[i] ? "[X]" : "[ ]";
+                    System.out.println(" " + (i + 1) + "." + statusIcon + " " + tasks[i]);
+                }
+            } else if (inputCommand.startsWith("mark ")) {
+                String taskNumberText = inputCommand.substring("mark ".length()).trim();
+
+                try {
+                    int taskIndex = Integer.parseInt(taskNumberText) - 1;
+                    if (taskIndex < 0 || taskIndex >= taskCount) {
+                        System.out.println(" That task number is not in your list.");
+                    } else {
+                        isDone[taskIndex] = true;
+                        System.out.println(" Nice! I've marked this task as done:");
+                        System.out.println("   [X] " + tasks[taskIndex]);
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println(" Please specify a task number, for example: mark 2");
                 }
             } else {
                 tasks[taskCount] = inputCommand;
