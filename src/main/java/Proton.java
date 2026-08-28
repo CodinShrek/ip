@@ -55,6 +55,21 @@ public class Proton {
                 } catch (NumberFormatException e) {
                     System.out.println(" Please specify a task number, for example: mark 2");
                 }
+            } else if (inputCommand.startsWith("unmark ")) {
+                String taskNumberText = inputCommand.substring("unmark ".length()).trim();
+
+                try {
+                    int taskIndex = Integer.parseInt(taskNumberText) - 1;
+                    if (taskIndex < 0 || taskIndex >= taskCount) {
+                        System.out.println(" That task number is not in your list.");
+                    } else {
+                        isDone[taskIndex] = false;
+                        System.out.println(" OK, I've marked this task as not done yet:");
+                        System.out.println("   [ ] " + tasks[taskIndex]);
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println(" Please specify a task number, for example: unmark 2");
+                }
             } else {
                 tasks[taskCount] = inputCommand;
                 taskCount++;
