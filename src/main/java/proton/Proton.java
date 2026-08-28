@@ -1,37 +1,46 @@
+package proton;
+
 import java.util.Scanner;
 
 /**
  * Runs the Proton chatbot and manages the user's task list.
  */
 public class Proton {
+    /** Maximum number of tasks that Proton can store. */
+    private static final int MAX_TASK_COUNT = 100;
+    /** Banner displayed when Proton starts. */
+    private static final String BANNER = " ____            _              \n"
+            + "|  _ \\ _ __ ___ | |_ ___  _ __ \n"
+            + "| |_) | '__/ _ \\| __/ _ \\| '_ \\\n"
+            + "|  __/| | | (_) | || (_) | | | |\n"
+            + "|_|   |_|  \\___/ \\__\\___/|_| |_|\n";
+    /** Separator displayed around Proton's responses. */
+    private static final String SEPARATOR = "____________________________________________________________";
+
+    /**
+     * Starts Proton and processes commands from the standard input stream.
+     *
+     * @param args Command-line arguments, which Proton does not use.
+     */
     public static void main(String[] args) {
-        String banner = " ____            _              \n"
-                + "|  _ \\ _ __ ___ | |_ ___  _ __ \n"
-                + "| |_) | '__/ _ \\| __/ _ \\| '_ \\\n"
-                + "|  __/| | | (_) | || (_) | | | |\n"
-                + "|_|   |_|  \\___/ \\__\\___/|_| |_|\n";
-
-        String SEPERATOR = "____________________________________________________________";
-
-        System.out.println(banner);
-        System.out.println(SEPERATOR);
+        System.out.println(BANNER);
+        System.out.println(SEPARATOR);
         System.out.println("Hey there! I'm Proton, your positively charged chatbot!");
         System.out.println("I'm fired up and ready to help! What awesome thing shall we tackle today?");
-        System.out.println(SEPERATOR);
+        System.out.println(SEPARATOR);
 
         Scanner scanner = new Scanner(System.in);
-
-        Task[] tasks = new Task[100];
+        Task[] tasks = new Task[MAX_TASK_COUNT];
         int taskCount = 0;
 
         while (scanner.hasNextLine()) {
             String inputCommand = scanner.nextLine();
 
-            System.out.println(SEPERATOR);
+            System.out.println(SEPARATOR);
 
             if (inputCommand.equals("bye")) {
                 System.out.println(" Powering down for now, I'll see you next time!");
-                System.out.println(SEPERATOR);
+                System.out.println(SEPARATOR);
                 break;
             } else if (inputCommand.equals("list")) {
                 System.out.println(" Here are the tasks in your list:");
@@ -74,10 +83,9 @@ public class Proton {
                 System.out.println(" added: " + inputCommand);
             }
 
-            System.out.println(SEPERATOR);
+            System.out.println(SEPARATOR);
         }
 
         scanner.close();
-
     }
 }
