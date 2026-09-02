@@ -77,6 +77,15 @@ public class Proton {
                 } catch (NumberFormatException exception) {
                     System.out.println(" Please specify a task number, for example: unmark 2");
                 }
+            } else if (inputCommand.startsWith("todo ")) {
+                String description = inputCommand.substring("todo ".length());
+                Task todo = Task.createTodo(description);
+                tasks[taskCount] = todo;
+                taskCount++;
+
+                System.out.println(" Got it. I've added this task:");
+                System.out.println("   " + todo);
+                System.out.println(" Now you have " + taskCount + " tasks in the list.");
             } else {
                 tasks[taskCount] = new Task(inputCommand);
                 taskCount++;
