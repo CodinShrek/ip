@@ -122,15 +122,70 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+### UI-EVENT-01: Add and manage an event task
+
+Aim: Verify that `event` stores and displays its start and end date/times as text.
+
+Input:
+
+```text
+event project meeting /from Mon 2pm /to 4pm
+list
+mark 1
+unmark 1
+list
+bye
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [E][ ] project meeting (from: Mon 2pm to: 4pm)
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [E][X] project meeting (from: Mon 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ OK, I've marked this task as not done yet:
+   [E][ ] project meeting (from: Mon 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
 ## Latest test session
 
-- Timestamp: `2026-09-03 00:39:07 +08:00`
-- Result: PASS (2 of 2 cases passed)
+- Timestamp: `2026-09-03 01:00:35 +08:00`
+- Result: PASS (3 of 3 cases passed)
 - Build: PASS
 - UI-TODO-01: PASS
 - UI-DEADLINE-01: PASS
-- Process exit codes: `0` for both cases
-- Standard error: Empty for both cases
+- UI-EVENT-01: PASS
+- Process exit codes: `0` for all cases
+- Standard error: Empty for all cases
 
 UI-TODO-01 transcript:
 
@@ -222,6 +277,54 @@ ____________________________________________________________
 ____________________________________________________________
  Here are the tasks in your list:
  1.[D][ ] return book (by: Sunday)
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+UI-EVENT-01 transcript:
+
+```text
+INPUT
+event project meeting /from Mon 2pm /to 4pm
+list
+mark 1
+unmark 1
+list
+bye
+
+OUTPUT
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [E][ ] project meeting (from: Mon 2pm to: 4pm)
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [E][X] project meeting (from: Mon 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ OK, I've marked this task as not done yet:
+   [E][ ] project meeting (from: Mon 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[E][ ] project meeting (from: Mon 2pm to: 4pm)
 ____________________________________________________________
 ____________________________________________________________
  Powering down for now, I'll see you next time!
