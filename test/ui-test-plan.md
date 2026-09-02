@@ -68,16 +68,71 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+### UI-DEADLINE-01: Add and manage a deadline task
+
+Aim: Verify that `deadline` stores and displays its due date/time as text.
+
+Input:
+
+```text
+deadline return book /by Sunday
+list
+mark 1
+unmark 1
+list
+bye
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [D][ ] return book (by: Sunday)
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[D][ ] return book (by: Sunday)
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [D][X] return book (by: Sunday)
+____________________________________________________________
+____________________________________________________________
+ OK, I've marked this task as not done yet:
+   [D][ ] return book (by: Sunday)
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[D][ ] return book (by: Sunday)
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
 ## Latest test session
 
-- Timestamp: `2026-09-03 00:27:24 +08:00`
-- Result: PASS (1 of 1 cases passed)
+- Timestamp: `2026-09-03 00:39:07 +08:00`
+- Result: PASS (2 of 2 cases passed)
 - Build: PASS
 - UI-TODO-01: PASS
-- Process exit code: `0`
-- Standard error: Empty
+- UI-DEADLINE-01: PASS
+- Process exit codes: `0` for both cases
+- Standard error: Empty for both cases
 
-Transcript:
+UI-TODO-01 transcript:
 
 ```text
 INPUT
@@ -119,6 +174,54 @@ ____________________________________________________________
 ____________________________________________________________
  Here are the tasks in your list:
  1.[T][ ] borrow book
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+UI-DEADLINE-01 transcript:
+
+```text
+INPUT
+deadline return book /by Sunday
+list
+mark 1
+unmark 1
+list
+bye
+
+OUTPUT
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [D][ ] return book (by: Sunday)
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[D][ ] return book (by: Sunday)
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [D][X] return book (by: Sunday)
+____________________________________________________________
+____________________________________________________________
+ OK, I've marked this task as not done yet:
+   [D][ ] return book (by: Sunday)
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[D][ ] return book (by: Sunday)
 ____________________________________________________________
 ____________________________________________________________
  Powering down for now, I'll see you next time!

@@ -86,6 +86,16 @@ public class Proton {
                 System.out.println(" Got it. I've added this task:");
                 System.out.println("   " + todo);
                 System.out.println(" Now you have " + taskCount + " tasks in the list.");
+            } else if (inputCommand.startsWith("deadline ")) {
+                String deadlineDetails = inputCommand.substring("deadline ".length());
+                String[] deadlineParts = deadlineDetails.split(" /by ", 2);
+                Task deadline = Task.createDeadline(deadlineParts[0], deadlineParts[1]);
+                tasks[taskCount] = deadline;
+                taskCount++;
+
+                System.out.println(" Got it. I've added this task:");
+                System.out.println("   " + deadline);
+                System.out.println(" Now you have " + taskCount + " tasks in the list.");
             } else {
                 tasks[taskCount] = new Task(inputCommand);
                 taskCount++;
