@@ -35,6 +35,17 @@ For every task that creates, edits, refactors, or reviews Java code, use the pro
 standard is mandatory for all Java code in this repository. Validate every changed Java file and do not introduce
 new coding-standard violations.
 
+## UI testing after code changes
+
+After every code update, and before reporting the task as complete:
+
+1. Review `test/ui-test-plan.md` and update it when the changed behavior, inputs, expected outputs, preconditions,
+   or test coverage require an update.
+2. Invoke the project-specific `$test-ui` skill and follow its instructions to run the applicable console UI tests.
+
+Do not skip `$test-ui` merely because the test plan did not need updating. If no applicable test case exists, use
+the skill to record that outcome in the latest test session rather than silently omitting UI testing.
+
 ## Git
 
 For every task that proposes, creates, amends, or reviews a commit or commit message, or names a branch, use the
