@@ -79,7 +79,7 @@ public class Proton {
                 }
             } else if (inputCommand.startsWith("todo ")) {
                 String description = inputCommand.substring("todo ".length());
-                Task todo = Task.createTodo(description);
+                Task todo = new Todo(description);
                 tasks[taskCount] = todo;
                 taskCount++;
 
@@ -89,7 +89,7 @@ public class Proton {
             } else if (inputCommand.startsWith("deadline ")) {
                 String deadlineDetails = inputCommand.substring("deadline ".length());
                 String[] deadlineParts = deadlineDetails.split(" /by ", 2);
-                Task deadline = Task.createDeadline(deadlineParts[0], deadlineParts[1]);
+                Task deadline = new Deadline(deadlineParts[0], deadlineParts[1]);
                 tasks[taskCount] = deadline;
                 taskCount++;
 
@@ -100,7 +100,7 @@ public class Proton {
                 String eventDetails = inputCommand.substring("event ".length());
                 String[] descriptionAndTimes = eventDetails.split(" /from ", 2);
                 String[] startAndEndTimes = descriptionAndTimes[1].split(" /to ", 2);
-                Task event = Task.createEvent(
+                Task event = new Event(
                         descriptionAndTimes[0], startAndEndTimes[0], startAndEndTimes[1]);
                 tasks[taskCount] = event;
                 taskCount++;

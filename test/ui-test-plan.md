@@ -4,7 +4,7 @@ This file is maintained by the project-specific `$test-ui` skill.
 
 ## Test configuration
 
-- Program build command: `javac -d out src\main\java\proton\Task.java src\main\java\proton\Proton.java`
+- Program build command: `javac -d out src\main\java\proton\Task.java src\main\java\proton\Todo.java src\main\java\proton\Deadline.java src\main\java\proton\Event.java src\main\java\proton\Proton.java`
 - Program launch command: `java -cp out proton.Proton`
 - Working directory: `E:\NUS\Academics\Year 2\CS2113\Individual_Project\ip`
 - Java version: 25 (verified using `java -version`)
@@ -178,7 +178,7 @@ ____________________________________________________________
 
 ## Latest test session
 
-- Timestamp: `2026-09-03 01:00:35 +08:00`
+- Timestamp: `2026-09-03 01:24:32 +08:00`
 - Result: PASS (3 of 3 cases passed)
 - Build: PASS
 - UI-TODO-01: PASS
