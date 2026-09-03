@@ -58,23 +58,44 @@ public class Proton {
         if (inputCommand.equals("bye")) {
             System.out.println(" Powering down for now, I'll see you next time!");
             return false;
-        } else if (inputCommand.equals("list")) {
-            listTasks();
-        } else if (inputCommand.startsWith("mark ")) {
-            markTask(inputCommand);
-        } else if (inputCommand.startsWith("unmark ")) {
-            unmarkTask(inputCommand);
-        } else if (inputCommand.startsWith("todo ")) {
-            addTodo(inputCommand);
-        } else if (inputCommand.startsWith("deadline ")) {
-            addDeadline(inputCommand);
-        } else if (inputCommand.startsWith("event ")) {
-            addEvent(inputCommand);
-        } else {
-            addGenericTask(inputCommand);
         }
 
+        if (inputCommand.equals("list")) {
+            listTasks();
+            return true;
+        }
+
+        if (inputCommand.startsWith("mark ")) {
+            markTask(inputCommand);
+            return true;
+        }
+
+        if (inputCommand.startsWith("unmark ")) {
+            unmarkTask(inputCommand);
+            return true;
+        }
+
+        processTaskCreationCommand(inputCommand);
         return true;
+    }
+
+    private void processTaskCreationCommand(String inputCommand) {
+        if (inputCommand.startsWith("todo ")) {
+            addTodo(inputCommand);
+            return;
+        }
+
+        if (inputCommand.startsWith("deadline ")) {
+            addDeadline(inputCommand);
+            return;
+        }
+
+        if (inputCommand.startsWith("event ")) {
+            addEvent(inputCommand);
+            return;
+        }
+
+        addGenericTask(inputCommand);
     }
 
     private void listTasks() {
