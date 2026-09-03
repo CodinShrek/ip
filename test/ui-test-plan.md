@@ -252,16 +252,53 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+### UI-UNKNOWN-01: Reject an unknown command
+
+Aim: Verify that an unknown command reports an error and does not add a task.
+
+Input:
+
+```text
+dance
+list
+bye
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ I'm sorry, but I don't know that command.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
 ## Latest test session
 
-- Timestamp: `2026-09-04 05:50:04 +08:00`
-- Result: PASS (5 of 5 cases passed)
+- Timestamp: `2026-09-04 05:53:49 +08:00`
+- Result: PASS (6 of 6 cases passed)
 - Build: PASS
 - UI-TODO-01: PASS
 - UI-DEADLINE-01: PASS
 - UI-EVENT-01: PASS
 - UI-DEADLINE-INVALID-01: PASS
 - UI-EVENT-INVALID-01: PASS
+- UI-UNKNOWN-01: PASS
 - Process exit codes: `0` for all cases
 - Standard error: Empty for all cases
 
@@ -467,6 +504,36 @@ ____________________________________________________________
  Got it. I've added this task:
    [E][ ] project meeting (from: Mon 2pm to: 4pm)
  Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+UI-UNKNOWN-01 transcript:
+
+```text
+INPUT
+dance
+list
+bye
+
+OUTPUT
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ I'm sorry, but I don't know that command.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
 ____________________________________________________________
 ____________________________________________________________
  Powering down for now, I'll see you next time!

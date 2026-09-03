@@ -105,7 +105,7 @@ public class Proton {
             return;
         }
 
-        addGenericTask(inputCommand);
+        System.out.println(" I'm sorry, but I don't know that command.");
     }
 
     private void listTasks() {
@@ -204,11 +204,5 @@ public class Proton {
         System.out.println(" Got it. I've added this task:");
         System.out.println("   " + task);
         System.out.println(" Now you have " + taskCount + " tasks in the list.");
-    }
-
-    private void addGenericTask(String inputCommand) {
-        tasks[taskCount] = new Task(inputCommand);
-        taskCount++;
-        System.out.println(" added: " + inputCommand);
     }
 }
