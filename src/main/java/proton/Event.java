@@ -4,9 +4,7 @@ package proton;
  * Represents a task that occurs between specific start and end date/times.
  */
 public class Event extends Task {
-    /** Date or time at which this task starts. */
     private final String startDateTime;
-    /** Date or time at which this task ends. */
     private final String endDateTime;
 
     /**

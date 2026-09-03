@@ -4,9 +4,7 @@ package proton;
  * Represents a task and whether it has been completed.
  */
 public class Task {
-    /** Description of this task. */
     private final String description;
-    /** Whether this task has been completed. */
     private boolean isDone;
 
     /**

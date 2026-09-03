@@ -4,7 +4,6 @@ package proton;
  * Represents a task that should be completed by a specific date or time.
  */
 public class Deadline extends Task {
-    /** Date or time by which this task should be completed. */
     private final String dueDateTime;
 
     /**

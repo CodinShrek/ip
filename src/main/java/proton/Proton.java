@@ -6,15 +6,12 @@ import java.util.Scanner;
  * Runs the Proton chatbot and manages the user's task list.
  */
 public class Proton {
-    /** Maximum number of tasks that Proton can store. */
     private static final int MAX_TASK_COUNT = 100;
-    /** Banner displayed when Proton starts. */
     private static final String BANNER = " ____            _              \n"
             + "|  _ \\ _ __ ___ | |_ ___  _ __ \n"
             + "| |_) | '__/ _ \\| __/ _ \\| '_ \\\n"
             + "|  __/| | | (_) | || (_) | | | |\n"
             + "|_|   |_|  \\___/ \\__\\___/|_| |_|\n";
-    /** Separator displayed around Proton's responses. */
     private static final String SEPARATOR = "____________________________________________________________";
     private static final String BYE_COMMAND = "bye";
     private static final String LIST_COMMAND = "list";
@@ -27,9 +24,7 @@ public class Proton {
     private static final String EVENT_START_DELIMITER = " /from ";
     private static final String EVENT_END_DELIMITER = " /to ";
 
-    /** Tasks stored by Proton. */
     private final Task[] tasks = new Task[MAX_TASK_COUNT];
-    /** Number of tasks currently stored. */
     private int taskCount;
 
     /**
