@@ -16,6 +16,16 @@ public class Proton {
             + "|_|   |_|  \\___/ \\__\\___/|_| |_|\n";
     /** Separator displayed around Proton's responses. */
     private static final String SEPARATOR = "____________________________________________________________";
+    private static final String BYE_COMMAND = "bye";
+    private static final String LIST_COMMAND = "list";
+    private static final String MARK_COMMAND_PREFIX = "mark ";
+    private static final String UNMARK_COMMAND_PREFIX = "unmark ";
+    private static final String TODO_COMMAND_PREFIX = "todo ";
+    private static final String DEADLINE_COMMAND_PREFIX = "deadline ";
+    private static final String EVENT_COMMAND_PREFIX = "event ";
+    private static final String DEADLINE_DELIMITER = " /by ";
+    private static final String EVENT_START_DELIMITER = " /from ";
+    private static final String EVENT_END_DELIMITER = " /to ";
 
     /** Tasks stored by Proton. */
     private final Task[] tasks = new Task[MAX_TASK_COUNT];
@@ -55,22 +65,22 @@ public class Proton {
     }
 
     private boolean processCommand(String inputCommand) {
-        if (inputCommand.equals("bye")) {
+        if (inputCommand.equals(BYE_COMMAND)) {
             System.out.println(" Powering down for now, I'll see you next time!");
             return false;
         }
 
-        if (inputCommand.equals("list")) {
+        if (inputCommand.equals(LIST_COMMAND)) {
             listTasks();
             return true;
         }
 
-        if (inputCommand.startsWith("mark ")) {
+        if (inputCommand.startsWith(MARK_COMMAND_PREFIX)) {
             markTask(inputCommand);
             return true;
         }
 
-        if (inputCommand.startsWith("unmark ")) {
+        if (inputCommand.startsWith(UNMARK_COMMAND_PREFIX)) {
             unmarkTask(inputCommand);
             return true;
         }
@@ -80,17 +90,17 @@ public class Proton {
     }
 
     private void processTaskCreationCommand(String inputCommand) {
-        if (inputCommand.startsWith("todo ")) {
+        if (inputCommand.startsWith(TODO_COMMAND_PREFIX)) {
             addTodo(inputCommand);
             return;
         }
 
-        if (inputCommand.startsWith("deadline ")) {
+        if (inputCommand.startsWith(DEADLINE_COMMAND_PREFIX)) {
             addDeadline(inputCommand);
             return;
         }
 
-        if (inputCommand.startsWith("event ")) {
+        if (inputCommand.startsWith(EVENT_COMMAND_PREFIX)) {
             addEvent(inputCommand);
             return;
         }
@@ -106,7 +116,7 @@ public class Proton {
     }
 
     private void markTask(String inputCommand) {
-        Task task = getTaskFromCommand(inputCommand, "mark ");
+        Task task = getTaskFromCommand(inputCommand, MARK_COMMAND_PREFIX);
         if (task == null) {
             return;
         }
@@ -117,7 +127,7 @@ public class Proton {
     }
 
     private void unmarkTask(String inputCommand) {
-        Task task = getTaskFromCommand(inputCommand, "unmark ");
+        Task task = getTaskFromCommand(inputCommand, UNMARK_COMMAND_PREFIX);
         if (task == null) {
             return;
         }
@@ -150,20 +160,20 @@ public class Proton {
     }
 
     private void addTodo(String inputCommand) {
-        String description = inputCommand.substring("todo ".length());
+        String description = inputCommand.substring(TODO_COMMAND_PREFIX.length());
         addTask(new Todo(description));
     }
 
     private void addDeadline(String inputCommand) {
-        String deadlineDetails = inputCommand.substring("deadline ".length());
-        String[] deadlineParts = deadlineDetails.split(" /by ", 2);
+        String deadlineDetails = inputCommand.substring(DEADLINE_COMMAND_PREFIX.length());
+        String[] deadlineParts = deadlineDetails.split(DEADLINE_DELIMITER, 2);
         addTask(new Deadline(deadlineParts[0], deadlineParts[1]));
     }
 
     private void addEvent(String inputCommand) {
-        String eventDetails = inputCommand.substring("event ".length());
-        String[] descriptionAndTimes = eventDetails.split(" /from ", 2);
-        String[] startAndEndTimes = descriptionAndTimes[1].split(" /to ", 2);
+        String eventDetails = inputCommand.substring(EVENT_COMMAND_PREFIX.length());
+        String[] descriptionAndTimes = eventDetails.split(EVENT_START_DELIMITER, 2);
+        String[] startAndEndTimes = descriptionAndTimes[1].split(EVENT_END_DELIMITER, 2);
         addTask(new Event(
                 descriptionAndTimes[0], startAndEndTimes[0], startAndEndTimes[1]));
     }
