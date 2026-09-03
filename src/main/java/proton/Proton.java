@@ -167,13 +167,32 @@ public class Proton {
     private void addDeadline(String inputCommand) {
         String deadlineDetails = inputCommand.substring(DEADLINE_COMMAND_PREFIX.length());
         String[] deadlineParts = deadlineDetails.split(DEADLINE_DELIMITER, 2);
+        if (deadlineParts.length < 2
+                || deadlineParts[0].isBlank()
+                || deadlineParts[1].isBlank()) {
+            System.out.println(" Please use this format: deadline DESCRIPTION /by DATE");
+            return;
+        }
+
         addTask(new Deadline(deadlineParts[0], deadlineParts[1]));
     }
 
     private void addEvent(String inputCommand) {
         String eventDetails = inputCommand.substring(EVENT_COMMAND_PREFIX.length());
         String[] descriptionAndTimes = eventDetails.split(EVENT_START_DELIMITER, 2);
+        if (descriptionAndTimes.length < 2 || descriptionAndTimes[0].isBlank()) {
+            System.out.println(" Please use this format: event DESCRIPTION /from START /to END");
+            return;
+        }
+
         String[] startAndEndTimes = descriptionAndTimes[1].split(EVENT_END_DELIMITER, 2);
+        if (startAndEndTimes.length < 2
+                || startAndEndTimes[0].isBlank()
+                || startAndEndTimes[1].isBlank()) {
+            System.out.println(" Please use this format: event DESCRIPTION /from START /to END");
+            return;
+        }
+
         addTask(new Event(
                 descriptionAndTimes[0], startAndEndTimes[0], startAndEndTimes[1]));
     }

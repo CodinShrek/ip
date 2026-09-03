@@ -176,14 +176,92 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+### UI-DEADLINE-INVALID-01: Reject a malformed deadline
+
+Aim: Verify that a deadline without `/by` reports its required format and does not stop later commands.
+
+Input:
+
+```text
+deadline return book
+deadline return book /by Sunday
+bye
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Please use this format: deadline DESCRIPTION /by DATE
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [D][ ] return book (by: Sunday)
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+### UI-EVENT-INVALID-01: Reject a malformed event
+
+Aim: Verify that an event without `/to` reports its required format and does not stop later commands.
+
+Input:
+
+```text
+event project meeting /from Mon 2pm
+event project meeting /from Mon 2pm /to 4pm
+bye
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Please use this format: event DESCRIPTION /from START /to END
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [E][ ] project meeting (from: Mon 2pm to: 4pm)
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
 ## Latest test session
 
-- Timestamp: `2026-09-04 05:46:27 +08:00`
-- Result: PASS (3 of 3 cases passed)
+- Timestamp: `2026-09-04 05:50:04 +08:00`
+- Result: PASS (5 of 5 cases passed)
 - Build: PASS
 - UI-TODO-01: PASS
 - UI-DEADLINE-01: PASS
 - UI-EVENT-01: PASS
+- UI-DEADLINE-INVALID-01: PASS
+- UI-EVENT-INVALID-01: PASS
 - Process exit codes: `0` for all cases
 - Standard error: Empty for all cases
 
@@ -325,6 +403,70 @@ ____________________________________________________________
 ____________________________________________________________
  Here are the tasks in your list:
  1.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+UI-DEADLINE-INVALID-01 transcript:
+
+```text
+INPUT
+deadline return book
+deadline return book /by Sunday
+bye
+
+OUTPUT
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Please use this format: deadline DESCRIPTION /by DATE
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [D][ ] return book (by: Sunday)
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+UI-EVENT-INVALID-01 transcript:
+
+```text
+INPUT
+event project meeting /from Mon 2pm
+event project meeting /from Mon 2pm /to 4pm
+bye
+
+OUTPUT
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Please use this format: event DESCRIPTION /from START /to END
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [E][ ] project meeting (from: Mon 2pm to: 4pm)
+ Now you have 1 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
  Powering down for now, I'll see you next time!
