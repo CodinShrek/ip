@@ -106,36 +106,46 @@ public class Proton {
     }
 
     private void markTask(String inputCommand) {
-        String taskNumberText = inputCommand.substring("mark ".length()).trim();
-
-        try {
-            int taskIndex = Integer.parseInt(taskNumberText) - 1;
-            if (taskIndex < 0 || taskIndex >= taskCount) {
-                System.out.println(" That task number is not in your list.");
-            } else {
-                tasks[taskIndex].markAsDone();
-                System.out.println(" Nice! I've marked this task as done:");
-                System.out.println("   " + tasks[taskIndex]);
-            }
-        } catch (NumberFormatException exception) {
-            System.out.println(" Please specify a task number, for example: mark 2");
+        Task task = getTaskFromCommand(inputCommand, "mark ");
+        if (task == null) {
+            return;
         }
+
+        task.markAsDone();
+        System.out.println(" Nice! I've marked this task as done:");
+        System.out.println("   " + task);
     }
 
     private void unmarkTask(String inputCommand) {
-        String taskNumberText = inputCommand.substring("unmark ".length()).trim();
+        Task task = getTaskFromCommand(inputCommand, "unmark ");
+        if (task == null) {
+            return;
+        }
 
+        task.markAsNotDone();
+        System.out.println(" OK, I've marked this task as not done yet:");
+        System.out.println("   " + task);
+    }
+
+    /**
+     * Finds the task referenced by a command containing a one-based task number.
+     *
+     * @return The matching task, or {@code null} after displaying a validation error.
+     */
+    private Task getTaskFromCommand(String inputCommand, String commandPrefix) {
+        String taskNumberText = inputCommand.substring(commandPrefix.length()).trim();
         try {
             int taskIndex = Integer.parseInt(taskNumberText) - 1;
             if (taskIndex < 0 || taskIndex >= taskCount) {
                 System.out.println(" That task number is not in your list.");
-            } else {
-                tasks[taskIndex].markAsNotDone();
-                System.out.println(" OK, I've marked this task as not done yet:");
-                System.out.println("   " + tasks[taskIndex]);
+                return null;
             }
+
+            return tasks[taskIndex];
         } catch (NumberFormatException exception) {
-            System.out.println(" Please specify a task number, for example: unmark 2");
+            System.out.println(" Please specify a task number, for example: "
+                    + commandPrefix.trim() + " 2");
+            return null;
         }
     }
 
