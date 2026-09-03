@@ -151,38 +151,29 @@ public class Proton {
 
     private void addTodo(String inputCommand) {
         String description = inputCommand.substring("todo ".length());
-        Task todo = new Todo(description);
-        tasks[taskCount] = todo;
-        taskCount++;
-
-        System.out.println(" Got it. I've added this task:");
-        System.out.println("   " + todo);
-        System.out.println(" Now you have " + taskCount + " tasks in the list.");
+        addTask(new Todo(description));
     }
 
     private void addDeadline(String inputCommand) {
         String deadlineDetails = inputCommand.substring("deadline ".length());
         String[] deadlineParts = deadlineDetails.split(" /by ", 2);
-        Task deadline = new Deadline(deadlineParts[0], deadlineParts[1]);
-        tasks[taskCount] = deadline;
-        taskCount++;
-
-        System.out.println(" Got it. I've added this task:");
-        System.out.println("   " + deadline);
-        System.out.println(" Now you have " + taskCount + " tasks in the list.");
+        addTask(new Deadline(deadlineParts[0], deadlineParts[1]));
     }
 
     private void addEvent(String inputCommand) {
         String eventDetails = inputCommand.substring("event ".length());
         String[] descriptionAndTimes = eventDetails.split(" /from ", 2);
         String[] startAndEndTimes = descriptionAndTimes[1].split(" /to ", 2);
-        Task event = new Event(
-                descriptionAndTimes[0], startAndEndTimes[0], startAndEndTimes[1]);
-        tasks[taskCount] = event;
+        addTask(new Event(
+                descriptionAndTimes[0], startAndEndTimes[0], startAndEndTimes[1]));
+    }
+
+    private void addTask(Task task) {
+        tasks[taskCount] = task;
         taskCount++;
 
         System.out.println(" Got it. I've added this task:");
-        System.out.println("   " + event);
+        System.out.println("   " + task);
         System.out.println(" Now you have " + taskCount + " tasks in the list.");
     }
 
