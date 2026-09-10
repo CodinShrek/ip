@@ -17,9 +17,12 @@ public class Proton {
     private static final String LIST_COMMAND = "list";
     private static final String MARK_COMMAND_PREFIX = "mark ";
     private static final String UNMARK_COMMAND_PREFIX = "unmark ";
-    private static final String TODO_COMMAND_PREFIX = "todo ";
-    private static final String DEADLINE_COMMAND_PREFIX = "deadline ";
-    private static final String EVENT_COMMAND_PREFIX = "event ";
+    private static final String TODO_COMMAND = "todo";
+    private static final String DEADLINE_COMMAND = "deadline";
+    private static final String EVENT_COMMAND = "event";
+    private static final String TODO_COMMAND_PREFIX = TODO_COMMAND + " ";
+    private static final String DEADLINE_COMMAND_PREFIX = DEADLINE_COMMAND + " ";
+    private static final String EVENT_COMMAND_PREFIX = EVENT_COMMAND + " ";
     private static final String DEADLINE_DELIMITER = " /by ";
     private static final String EVENT_START_DELIMITER = " /from ";
     private static final String EVENT_END_DELIMITER = " /to ";
@@ -99,17 +102,20 @@ public class Proton {
     }
 
     private void processTaskCreationCommand(String inputCommand) throws ProtonException {
-        if (inputCommand.startsWith(TODO_COMMAND_PREFIX)) {
+        if (inputCommand.equals(TODO_COMMAND)
+                || inputCommand.startsWith(TODO_COMMAND_PREFIX)) {
             addTodo(inputCommand);
             return;
         }
 
-        if (inputCommand.startsWith(DEADLINE_COMMAND_PREFIX)) {
+        if (inputCommand.equals(DEADLINE_COMMAND)
+                || inputCommand.startsWith(DEADLINE_COMMAND_PREFIX)) {
             addDeadline(inputCommand);
             return;
         }
 
-        if (inputCommand.startsWith(EVENT_COMMAND_PREFIX)) {
+        if (inputCommand.equals(EVENT_COMMAND)
+                || inputCommand.startsWith(EVENT_COMMAND_PREFIX)) {
             addEvent(inputCommand);
             return;
         }
@@ -169,38 +175,43 @@ public class Proton {
         }
     }
 
-    private void addTodo(String inputCommand) {
-        String description = inputCommand.substring(TODO_COMMAND_PREFIX.length());
+    private void addTodo(String inputCommand) throws ProtonException {
+        String description = inputCommand.substring(TODO_COMMAND.length()).trim();
+        if (description.isBlank()) {
+            throw new ProtonException(
+                    "Positive charge alert! A todo needs a description.");
+        }
+
         addTask(new Todo(description));
     }
 
-    private void addDeadline(String inputCommand) {
-        String deadlineDetails = inputCommand.substring(DEADLINE_COMMAND_PREFIX.length());
+    private void addDeadline(String inputCommand) throws ProtonException {
+        String deadlineDetails = inputCommand.substring(DEADLINE_COMMAND.length()).trim();
         String[] deadlineParts = deadlineDetails.split(DEADLINE_DELIMITER, 2);
         if (deadlineParts.length < 2
                 || deadlineParts[0].isBlank()
                 || deadlineParts[1].isBlank()) {
-            System.out.println(" Please use this format: deadline DESCRIPTION /by DATE");
-            return;
+            throw new ProtonException(
+                    "Positive charge alert! Use: deadline DESCRIPTION /by DATE");
         }
 
         addTask(new Deadline(deadlineParts[0], deadlineParts[1]));
     }
 
-    private void addEvent(String inputCommand) {
-        String eventDetails = inputCommand.substring(EVENT_COMMAND_PREFIX.length());
+    private void addEvent(String inputCommand) throws ProtonException {
+        String eventDetails = inputCommand.substring(EVENT_COMMAND.length()).trim();
         String[] descriptionAndTimes = eventDetails.split(EVENT_START_DELIMITER, 2);
         if (descriptionAndTimes.length < 2 || descriptionAndTimes[0].isBlank()) {
-            System.out.println(" Please use this format: event DESCRIPTION /from START /to END");
-            return;
+            throw new ProtonException(
+                    "Positive charge alert! Use: event DESCRIPTION /from START /to END");
         }
 
         String[] startAndEndTimes = descriptionAndTimes[1].split(EVENT_END_DELIMITER, 2);
         if (startAndEndTimes.length < 2
                 || startAndEndTimes[0].isBlank()
                 || startAndEndTimes[1].isBlank()) {
-            System.out.println(" Please use this format: event DESCRIPTION /from START /to END");
-            return;
+            throw new ProtonException(
+                    "Positive charge alert! Use: event DESCRIPTION /from START /to END");
         }
 
         addTask(new Event(
