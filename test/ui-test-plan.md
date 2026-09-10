@@ -290,6 +290,61 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+### UI-TASK-NUMBER-INVALID-01: Reject invalid task references
+
+Aim: Verify that invalid task references report specific errors and do not stop later commands.
+
+Input:
+
+```text
+mark
+unmark proton
+mark 1
+todo borrow book
+mark 2
+mark 1
+bye
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: mark TASK_NUMBER
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: unmark TASK_NUMBER
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! There are no tasks in Proton's orbit yet.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] borrow book
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Choose a task number from 1 to 1.
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [T][X] borrow book
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
 ### UI-UNKNOWN-01: Reject an unknown command
 
 Aim: Verify that an unknown command reports an error and does not add a task.
@@ -360,8 +415,8 @@ ____________________________________________________________
 
 ## Latest test session
 
-- Timestamp: `2026-09-11 02:06:07 +08:00`
-- Result: PASS (8 of 8 cases passed)
+- Timestamp: `2026-09-11 02:15:30 +08:00`
+- Result: PASS (9 of 9 cases passed)
 - Build: PASS
 - UI-TODO-01: PASS
 - UI-DEADLINE-01: PASS
@@ -369,6 +424,7 @@ ____________________________________________________________
 - UI-TODO-INVALID-01: PASS
 - UI-DEADLINE-INVALID-01: PASS
 - UI-EVENT-INVALID-01: PASS
+- UI-TASK-NUMBER-INVALID-01: PASS
 - UI-UNKNOWN-01: PASS
 - UI-BLANK-01: PASS
 - Process exit codes: `0` for all cases
@@ -608,6 +664,55 @@ ____________________________________________________________
  Got it. I've added this task:
    [E][ ] project meeting (from: Mon 2pm to: 4pm)
  Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+UI-TASK-NUMBER-INVALID-01 transcript:
+
+```text
+INPUT
+mark
+unmark proton
+mark 1
+todo borrow book
+mark 2
+mark 1
+bye
+
+OUTPUT
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: mark TASK_NUMBER
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: unmark TASK_NUMBER
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! There are no tasks in Proton's orbit yet.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] borrow book
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Choose a task number from 1 to 1.
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [T][X] borrow book
 ____________________________________________________________
 ____________________________________________________________
  Powering down for now, I'll see you next time!

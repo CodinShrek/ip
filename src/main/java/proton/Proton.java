@@ -15,11 +15,13 @@ public class Proton {
     private static final String SEPARATOR = "____________________________________________________________";
     private static final String BYE_COMMAND = "bye";
     private static final String LIST_COMMAND = "list";
-    private static final String MARK_COMMAND_PREFIX = "mark ";
-    private static final String UNMARK_COMMAND_PREFIX = "unmark ";
+    private static final String MARK_COMMAND = "mark";
+    private static final String UNMARK_COMMAND = "unmark";
     private static final String TODO_COMMAND = "todo";
     private static final String DEADLINE_COMMAND = "deadline";
     private static final String EVENT_COMMAND = "event";
+    private static final String MARK_COMMAND_PREFIX = MARK_COMMAND + " ";
+    private static final String UNMARK_COMMAND_PREFIX = UNMARK_COMMAND + " ";
     private static final String TODO_COMMAND_PREFIX = TODO_COMMAND + " ";
     private static final String DEADLINE_COMMAND_PREFIX = DEADLINE_COMMAND + " ";
     private static final String EVENT_COMMAND_PREFIX = EVENT_COMMAND + " ";
@@ -87,12 +89,14 @@ public class Proton {
             return true;
         }
 
-        if (inputCommand.startsWith(MARK_COMMAND_PREFIX)) {
+        if (inputCommand.equals(MARK_COMMAND)
+                || inputCommand.startsWith(MARK_COMMAND_PREFIX)) {
             markTask(inputCommand);
             return true;
         }
 
-        if (inputCommand.startsWith(UNMARK_COMMAND_PREFIX)) {
+        if (inputCommand.equals(UNMARK_COMMAND)
+                || inputCommand.startsWith(UNMARK_COMMAND_PREFIX)) {
             unmarkTask(inputCommand);
             return true;
         }
@@ -131,23 +135,15 @@ public class Proton {
         }
     }
 
-    private void markTask(String inputCommand) {
-        Task task = getTaskFromCommand(inputCommand, MARK_COMMAND_PREFIX);
-        if (task == null) {
-            return;
-        }
-
+    private void markTask(String inputCommand) throws ProtonException {
+        Task task = getTaskFromCommand(inputCommand, MARK_COMMAND);
         task.markAsDone();
         System.out.println(" Nice! I've marked this task as done:");
         System.out.println("   " + task);
     }
 
-    private void unmarkTask(String inputCommand) {
-        Task task = getTaskFromCommand(inputCommand, UNMARK_COMMAND_PREFIX);
-        if (task == null) {
-            return;
-        }
-
+    private void unmarkTask(String inputCommand) throws ProtonException {
+        Task task = getTaskFromCommand(inputCommand, UNMARK_COMMAND);
         task.markAsNotDone();
         System.out.println(" OK, I've marked this task as not done yet:");
         System.out.println("   " + task);
@@ -156,22 +152,32 @@ public class Proton {
     /**
      * Finds the task referenced by a command containing a one-based task number.
      *
-     * @return The matching task, or {@code null} after displaying a validation error.
+     * @return The matching task.
+     * @throws ProtonException If the command does not contain an existing task number.
      */
-    private Task getTaskFromCommand(String inputCommand, String commandPrefix) {
-        String taskNumberText = inputCommand.substring(commandPrefix.length()).trim();
+    private Task getTaskFromCommand(String inputCommand, String command) throws ProtonException {
+        String taskNumberText = inputCommand.substring(command.length()).trim();
+        if (taskNumberText.isBlank()) {
+            throw new ProtonException(
+                    "Positive charge alert! Use: " + command + " TASK_NUMBER");
+        }
+
         try {
             int taskIndex = Integer.parseInt(taskNumberText) - 1;
+            if (taskCount == 0) {
+                throw new ProtonException(
+                        "Positive charge alert! There are no tasks in Proton's orbit yet.");
+            }
+
             if (taskIndex < 0 || taskIndex >= taskCount) {
-                System.out.println(" That task number is not in your list.");
-                return null;
+                throw new ProtonException(
+                        "Positive charge alert! Choose a task number from 1 to " + taskCount + ".");
             }
 
             return tasks[taskIndex];
         } catch (NumberFormatException exception) {
-            System.out.println(" Please specify a task number, for example: "
-                    + commandPrefix.trim() + " 2");
-            return null;
+            throw new ProtonException(
+                    "Positive charge alert! Use: " + command + " TASK_NUMBER");
         }
     }
 
