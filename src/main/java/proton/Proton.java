@@ -224,7 +224,13 @@ public class Proton {
                 descriptionAndTimes[0], startAndEndTimes[0], startAndEndTimes[1]));
     }
 
-    private void addTask(Task task) {
+    private void addTask(Task task) throws ProtonException {
+        if (taskCount >= MAX_TASK_COUNT) {
+            throw new ProtonException(
+                    "Positive charge alert! Proton's task nucleus is full at "
+                            + MAX_TASK_COUNT + " tasks.");
+        }
+
         tasks[taskCount] = task;
         taskCount++;
 
