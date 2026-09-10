@@ -1,4 +1,4 @@
-package proton;
+package proton.task;
 
 /**
  * Represents a task that occurs between specific start and end date/times.

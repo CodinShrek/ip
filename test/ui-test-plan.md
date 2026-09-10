@@ -4,7 +4,7 @@ This file is maintained by the project-specific `$test-ui` skill.
 
 ## Test configuration
 
-- Program build command: `javac -d out src\main\java\proton\Task.java src\main\java\proton\Todo.java src\main\java\proton\Deadline.java src\main\java\proton\Event.java src\main\java\proton\ProtonException.java src\main\java\proton\Proton.java`
+- Program build command: `javac -d out src\main\java\proton\task\Task.java src\main\java\proton\task\Todo.java src\main\java\proton\task\Deadline.java src\main\java\proton\task\Event.java src\main\java\proton\exception\ProtonException.java src\main\java\proton\Proton.java`
 - Program launch command: `java -cp out proton.Proton`
 - Working directory: `E:\NUS\Academics\Year 2\CS2113\Individual_Project\ip`
 - Java version: 25 (verified using `java -version`)

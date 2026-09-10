@@ -1,4 +1,4 @@
-package proton;
+package proton.task;
 
 /**
  * Represents a task and whether it has been completed.

@@ -1,4 +1,4 @@
-package proton;
+package proton.task;
 
 /**
  * Represents a task without an associated date or time.

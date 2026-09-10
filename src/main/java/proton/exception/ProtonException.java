@@ -1,4 +1,4 @@
-package proton;
+package proton.exception;
 
 /**
  * Represents a recoverable error caused by an invalid command given to Proton.
