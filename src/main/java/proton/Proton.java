@@ -60,6 +60,20 @@ public class Proton {
     }
 
     private boolean processCommand(String inputCommand) {
+        try {
+            return executeCommand(inputCommand);
+        } catch (ProtonException exception) {
+            System.out.println(" " + exception.getMessage());
+            return true;
+        }
+    }
+
+    private boolean executeCommand(String inputCommand) throws ProtonException {
+        if (inputCommand.isBlank()) {
+            throw new ProtonException(
+                    "Positive charge alert! No command was detected. Please enter a command.");
+        }
+
         if (inputCommand.equals(BYE_COMMAND)) {
             System.out.println(" Powering down for now, I'll see you next time!");
             return false;
@@ -84,7 +98,7 @@ public class Proton {
         return true;
     }
 
-    private void processTaskCreationCommand(String inputCommand) {
+    private void processTaskCreationCommand(String inputCommand) throws ProtonException {
         if (inputCommand.startsWith(TODO_COMMAND_PREFIX)) {
             addTodo(inputCommand);
             return;
@@ -100,7 +114,8 @@ public class Proton {
             return;
         }
 
-        System.out.println(" I'm sorry, but I don't know that command.");
+        throw new ProtonException(
+                "Positive charge alert! That command is outside Proton's orbit.");
     }
 
     private void listTasks() {

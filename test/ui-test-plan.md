@@ -4,7 +4,7 @@ This file is maintained by the project-specific `$test-ui` skill.
 
 ## Test configuration
 
-- Program build command: `javac -d out src\main\java\proton\Task.java src\main\java\proton\Todo.java src\main\java\proton\Deadline.java src\main\java\proton\Event.java src\main\java\proton\Proton.java`
+- Program build command: `javac -d out src\main\java\proton\Task.java src\main\java\proton\Todo.java src\main\java\proton\Deadline.java src\main\java\proton\Event.java src\main\java\proton\ProtonException.java src\main\java\proton\Proton.java`
 - Program launch command: `java -cp out proton.Proton`
 - Working directory: `E:\NUS\Academics\Year 2\CS2113\Individual_Project\ip`
 - Java version: 25 (verified using `java -version`)
@@ -278,7 +278,7 @@ Hey there! I'm Proton, your positively charged chatbot!
 I'm fired up and ready to help! What awesome thing shall we tackle today?
 ____________________________________________________________
 ____________________________________________________________
- I'm sorry, but I don't know that command.
+ Positive charge alert! That command is outside Proton's orbit.
 ____________________________________________________________
 ____________________________________________________________
  Here are the tasks in your list:
@@ -288,10 +288,42 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+### UI-BLANK-01: Reject a blank command
+
+Aim: Verify that a blank command reports an error and does not stop later commands.
+
+Input:
+
+```text
+
+bye
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! No command was detected. Please enter a command.
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
 ## Latest test session
 
-- Timestamp: `2026-09-04 05:58:40 +08:00`
-- Result: PASS (6 of 6 cases passed)
+- Timestamp: `2026-09-11 02:03:14 +08:00`
+- Result: PASS (7 of 7 cases passed)
 - Build: PASS
 - UI-TODO-01: PASS
 - UI-DEADLINE-01: PASS
@@ -299,6 +331,7 @@ ____________________________________________________________
 - UI-DEADLINE-INVALID-01: PASS
 - UI-EVENT-INVALID-01: PASS
 - UI-UNKNOWN-01: PASS
+- UI-BLANK-01: PASS
 - Process exit codes: `0` for all cases
 - Standard error: Empty for all cases
 
@@ -530,10 +563,36 @@ Hey there! I'm Proton, your positively charged chatbot!
 I'm fired up and ready to help! What awesome thing shall we tackle today?
 ____________________________________________________________
 ____________________________________________________________
- I'm sorry, but I don't know that command.
+ Positive charge alert! That command is outside Proton's orbit.
 ____________________________________________________________
 ____________________________________________________________
  Here are the tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+UI-BLANK-01 transcript:
+
+```text
+INPUT
+
+bye
+
+OUTPUT
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! No command was detected. Please enter a command.
 ____________________________________________________________
 ____________________________________________________________
  Powering down for now, I'll see you next time!
