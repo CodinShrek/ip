@@ -26,4 +26,8 @@ public class Deadline extends Task {
     public String toString() {
         return "[D]" + super.toString() + " (by: " + dueDateTime + ")";
     }
+
+    public String getDueDateTime() {
+        return dueDateTime;
+    }
 }

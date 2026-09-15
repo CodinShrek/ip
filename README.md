@@ -26,17 +26,35 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
 
 ## Task persistence
 
-Run Proton from the project root. Adding, marking, unmarking, or deleting a task
-automatically overwrites `data/proton.txt`, creating `data/` if needed. The UTF-8
-file contains one task per line in the same format as the task list, including
-its type, completion status, and any dates or times. Deleting the last task
-leaves an empty file.
+Run Proton from the project root. Proton loads `data/proton.txt` at startup
+and saves after adding, marking, unmarking, or deleting a task. A missing
+file starts an empty list. Malformed or unreadable saves stop startup before
+commands can modify the data; repair the file or restore a backup and restart.
 
-On startup, Proton loads the saved tasks, including their types, completion
-status, and dates or times. A missing or empty file starts an empty list.
-If the file cannot be read or contains a malformed task, Proton reports the
-problem and stops before accepting commands, preserving the saved file.
+New saves start with `PROTON 1`. Each following line contains tab-separated
+task type (`T`, `D`, or `E`), completion status (`0` or `1`), and task fields
+encoded as Base64 UTF-8. Encoding keeps tabs, Unicode, and display markers
+inside fields separate from the file structure. Base64 is not encryption.
+Deleting the last task leaves only the header. Empty legacy files and valid
+legacy display-format records still load; the next successful edit converts
+them to the new format. Ambiguous legacy records must be corrected manually.
 
-The display-based format is intended for ordinary task text. Avoid embedding
-the formatting markers ` (by: `, ` (from: `, and ` to: ` in task fields: they
-can make the boundaries between saved fields ambiguous.
+Proton writes a temporary file in `data/`, then atomically replaces the save.
+If writing or replacement fails, the command is rejected and the in-memory
+list is restored. The old save is not truncated. Check available disk space,
+path permissions, and whether another program is holding the file open before
+retrying. File systems without atomic replacement reject saves safely.
+
+Changes made to the file since loading are detected before saving. Restart
+Proton to load those changes. Use one Proton instance at a time: this check
+is not a lock against simultaneous writers. Symbolic links at the data or
+save path are rejected. Temporary files left by an interrupted write are not
+loaded. Atomic replacement protects against partial writes, but does not
+replace backups or guarantee durability after hardware failure or power loss.
+
+## Console tests
+
+With Java 25 and Python 3.10 or newer, run `python test/run_ui.py` from the
+project root. Tests use isolated directories under `_temp/`, preserving real
+saved tasks. See `test/ui-test-plan.md` for exact inputs, expected outputs,
+file-system fixtures, and the latest captured session.

@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PLAN = ROOT / 'test/ui-test-plan.md'
 
 
-def run_case(inputs, expected, snapshots, directory):
+def run_case(inputs, expected, snapshots, directory, actions=None):
     """Capture a fresh run; inspect storage after each response when checkpoints exist."""
     process = subprocess.Popen(
         ['java', '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8',
@@ -59,14 +59,24 @@ def run_case(inputs, expected, snapshots, directory):
 
     try:
         read_frame()
-        for command, snapshot in zip(inputs.splitlines(), snapshots, strict=True):
+        for index, (command, snapshot) in enumerate(zip(inputs.splitlines(), snapshots, strict=True)):
+            save_file = Path(directory) / 'data/proton.txt'
+            action = (actions or {}).get(str(index))
+            if action == 'block':
+                save_file.rename(save_file.with_suffix('.backup'))
+                save_file.mkdir()
+            elif action == 'unblock':
+                save_file.rmdir()
+                save_file.with_suffix('.backup').rename(save_file)
+            elif isinstance(action, dict):
+                save_file.write_text(action['replace'], encoding='utf-8')
             process.stdin.write(command + '\n')
             process.stdin.flush()
             read_frame()
             if not expected.startswith(''.join(captured)):
                 raise AssertionError('Console response mismatch.')
-            save_file = Path(directory) / 'data/proton.txt'
-            actual = save_file.read_text(encoding='utf-8') if save_file.exists() else None
+            actual = ('DIRECTORY' if save_file.is_dir() else
+                      save_file.read_text(encoding='utf-8') if save_file.exists() else None)
             if actual != snapshot:
                 raise AssertionError(f'{command}: expected save {snapshot!r}, got {actual!r}')
             checks.append(f'{command}: PASS; save file = {json.dumps(actual, ensure_ascii=False)}')
@@ -111,6 +121,7 @@ def main():
         checkpoint = re.search(r'```json\n(.*?)```', body, re.S)
         configuration = json.loads(checkpoint[1]) if checkpoint else None
         options = configuration if isinstance(configuration, dict) else {}
+        inputs = options.get('input_text', inputs)
         snapshots = options.get('snapshots') if options else configuration
         restart_record = ''
         with TemporaryDirectory(prefix='ui-', dir=ROOT / '_temp') as directory:
@@ -118,7 +129,18 @@ def main():
             if 'initial_save' in options:
                 save_file.parent.mkdir()
                 save_file.write_text(options['initial_save'], encoding='utf-8')
-            actual, stderr, code, checks = run_case(inputs, expected, snapshots, directory)
+            if 'initial_hex' in options:
+                save_file.parent.mkdir(exist_ok=True)
+                save_file.write_bytes(bytes.fromhex(options['initial_hex']))
+            if options.get('directory_save'):
+                save_file.mkdir(parents=True)
+            original_bytes = save_file.read_bytes() if save_file.is_file() else None
+            actual, stderr, code, checks = run_case(
+                inputs, expected, snapshots, directory, options.get('actions'))
+            if options.get('preserve_bytes') and save_file.read_bytes() != original_bytes:
+                checks += '\nFAIL: Save bytes changed.'
+            if options.get('directory_save') and not save_file.is_dir():
+                checks += '\nFAIL: Save directory changed.'
             if 'unchanged_save' in options:
                 if save_file.read_text(encoding='utf-8') != options['unchanged_save']:
                     checks += '\nFAIL: Startup changed the save file.'
@@ -139,7 +161,8 @@ def main():
         failed = actual != expected or bool(stderr) or code != 0 or 'FAIL:' in checks
         status = 'FAIL' if failed else 'PASS'
         print(name.split(':')[0], status)
-        record = (f'### {name}\n\n{status}; exit code: {code}\n\nInput:\n\n```text\n{inputs}```\n\n'
+        displayed_inputs = inputs.replace('\x00', '\\u0000')
+        record = (f'### {name}\n\n{status}; exit code: {code}\n\nInput:\n\n```text\n{displayed_inputs}```\n\n'
                   f'Actual stdout:\n\n```text\n{actual}```\n\nStderr:\n\n```text\n{stderr}```\n')
         if checks:
             record += f'\nSave checks:\n\n```text\n{checks}\n```\n'

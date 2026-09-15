@@ -1,26 +1,21 @@
 package proton;
 
 import proton.exception.ProtonException;
+import proton.storage.Storage;
 import proton.task.Deadline;
 import proton.task.Event;
 import proton.task.Task;
 import proton.task.Todo;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Runs the Proton chatbot and manages the user's task list.
  */
 public class Proton {
-    private static final Path SAVE_FILE = Path.of("data", "proton.txt");
     private static final String BANNER = " ____            _              \n"
             + "|  _ \\ _ __ ___ | |_ ___  _ __ \n"
             + "| |_) | '__/ _ \\| __/ _ \\| '_ \\\n"
@@ -45,6 +40,7 @@ public class Proton {
     private static final String EVENT_START_DELIMITER = " /from ";
     private static final String EVENT_END_DELIMITER = " /to ";
 
+    private final Storage storage = new Storage(Path.of("data", "proton.txt"));
     private final ArrayList<Task> tasks = new ArrayList<>();
 
     /**
@@ -57,13 +53,14 @@ public class Proton {
     }
 
     private void run() {
-        printWelcomeMessage();
         try {
-            loadTasks();
+            tasks.addAll(storage.load());
         } catch (IOException | IllegalArgumentException exception) {
+            printWelcomeMessage();
             System.out.println(" Proton could not load data/proton.txt. Check the file and restart.");
             return;
         }
+        printWelcomeMessage();
 
         Scanner scanner = new Scanner(System.in);
         boolean shouldContinue = true;
@@ -85,16 +82,37 @@ public class Proton {
         System.out.println(SEPARATOR);
     }
 
+    /**
+     * Restores both list membership and completion flags when a command cannot be saved.
+     */
     private boolean processCommand(String inputCommand) {
+        ArrayList<Task> previousTasks = new ArrayList<>(tasks);
+        ArrayList<Boolean> previousStatuses = new ArrayList<>();
+        for (Task task : tasks) {
+            previousStatuses.add(task.isDone());
+        }
+
         try {
             return executeCommand(inputCommand);
         } catch (ProtonException exception) {
+            tasks.clear();
+            tasks.addAll(previousTasks);
+            for (int i = 0; i < tasks.size(); i++) {
+                if (previousStatuses.get(i)) {
+                    tasks.get(i).markAsDone();
+                } else {
+                    tasks.get(i).markAsNotDone();
+                }
+            }
             System.out.println(" " + exception.getMessage());
             return true;
         }
     }
 
     private boolean executeCommand(String inputCommand) throws ProtonException {
+        if (inputCommand.chars().anyMatch(value -> Character.isISOControl(value) && value != '\t')) {
+            throw new ProtonException("Positive charge alert! Commands cannot contain control characters.");
+        }
         if (inputCommand.isBlank()) {
             throw new ProtonException(
                     "Positive charge alert! No command was detected. Please enter a command.");
@@ -206,18 +224,18 @@ public class Proton {
         }
 
         try {
-            int taskIndex = Integer.parseInt(taskNumberText) - 1;
+            int taskNumber = Integer.parseInt(taskNumberText);
             if (tasks.isEmpty()) {
                 throw new ProtonException(
                         "Positive charge alert! There are no tasks in Proton's orbit yet.");
             }
 
-            if (taskIndex < 0 || taskIndex >= tasks.size()) {
+            if (taskNumber < 1 || taskNumber > tasks.size()) {
                 throw new ProtonException(
                         "Positive charge alert! Choose a task number from 1 to " + tasks.size() + ".");
             }
 
-            return taskIndex;
+            return taskNumber - 1;
         } catch (NumberFormatException exception) {
             throw new ProtonException(
                     "Positive charge alert! Use: " + command + " TASK_NUMBER");
@@ -277,73 +295,16 @@ public class Proton {
     }
 
     /**
-     * Loads saved tasks in order before accepting commands. A missing file means a new task list.
+     * Saves the current list without truncating the previous file on a failed write.
      *
-     * @throws IOException If an existing save file cannot be read.
-     * @throws IllegalArgumentException If a saved task has an invalid format.
-     */
-    private void loadTasks() throws IOException {
-        try {
-            for (String line : Files.readAllLines(SAVE_FILE)) {
-                tasks.add(parseSavedTask(line));
-            }
-        } catch (NoSuchFileException exception) {
-            // There is no saved list on the first run.
-        }
-    }
-
-    /**
-     * Restores a task's type, details, and completion status from its saved display format.
-     *
-     * @throws IllegalArgumentException If the line does not describe a supported task.
-     */
-    private Task parseSavedTask(String line) {
-        Matcher taskMatcher = Pattern.compile("\\[([TDE])\\]\\[([ X])\\] (.+)").matcher(line);
-        if (!taskMatcher.matches()) {
-            throw new IllegalArgumentException("Invalid saved task.");
-        }
-
-        String type = taskMatcher.group(1);
-        String details = taskMatcher.group(3);
-        Task task;
-        if (type.equals("T")) {
-            task = new Todo(details);
-        } else if (type.equals("D")) {
-            Matcher deadlineMatcher = Pattern.compile("(.+) \\(by: (.+)\\)").matcher(details);
-            if (!deadlineMatcher.matches()) {
-                throw new IllegalArgumentException("Invalid saved deadline.");
-            }
-            task = new Deadline(deadlineMatcher.group(1), deadlineMatcher.group(2));
-        } else {
-            Matcher eventMatcher = Pattern.compile("(.+) \\(from: (.+?) to: (.+)\\)").matcher(details);
-            if (!eventMatcher.matches()) {
-                throw new IllegalArgumentException("Invalid saved event.");
-            }
-            task = new Event(eventMatcher.group(1), eventMatcher.group(2), eventMatcher.group(3));
-        }
-
-        if (taskMatcher.group(2).equals("X")) {
-            task.markAsDone();
-        }
-        return task;
-    }
-
-    /**
-     * Overwrites the UTF-8 save file with one displayed task per line, creating its directory if needed.
-     *
-     * @throws ProtonException If the updated list cannot be saved.
+     * @throws ProtonException If storage fails; the command handler restores the previous list.
      */
     private void saveTasks() throws ProtonException {
         try {
-            Files.createDirectories(SAVE_FILE.getParent());
-            try (BufferedWriter writer = Files.newBufferedWriter(SAVE_FILE)) {
-                for (Task task : tasks) {
-                    writer.write(task.toString());
-                    writer.newLine();
-                }
-            }
+            storage.save(tasks);
         } catch (IOException exception) {
-            throw new ProtonException("The task list changed, but Proton could not save it to " + SAVE_FILE + ".");
+            throw new ProtonException("Could not save data/proton.txt. No tasks were changed. "
+                    + "Check the path and permissions, then retry or restart.");
         }
     }
 }
