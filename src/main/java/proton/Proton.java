@@ -1,11 +1,14 @@
 package proton;
 
 import proton.exception.ProtonException;
+import proton.storage.Storage;
 import proton.task.Deadline;
 import proton.task.Event;
 import proton.task.Task;
 import proton.task.Todo;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -37,6 +40,7 @@ public class Proton {
     private static final String EVENT_START_DELIMITER = " /from ";
     private static final String EVENT_END_DELIMITER = " /to ";
 
+    private final Storage storage = new Storage(Path.of("data", "proton.txt"));
     private final ArrayList<Task> tasks = new ArrayList<>();
 
     /**
@@ -49,6 +53,13 @@ public class Proton {
     }
 
     private void run() {
+        try {
+            tasks.addAll(storage.load());
+        } catch (IOException | IllegalArgumentException exception) {
+            printWelcomeMessage();
+            System.out.println(" Proton could not load data/proton.txt. Check the file and restart.");
+            return;
+        }
         printWelcomeMessage();
 
         Scanner scanner = new Scanner(System.in);
@@ -71,16 +82,37 @@ public class Proton {
         System.out.println(SEPARATOR);
     }
 
+    /**
+     * Restores both list membership and completion flags when a command cannot be saved.
+     */
     private boolean processCommand(String inputCommand) {
+        ArrayList<Task> previousTasks = new ArrayList<>(tasks);
+        ArrayList<Boolean> previousStatuses = new ArrayList<>();
+        for (Task task : tasks) {
+            previousStatuses.add(task.isDone());
+        }
+
         try {
             return executeCommand(inputCommand);
         } catch (ProtonException exception) {
+            tasks.clear();
+            tasks.addAll(previousTasks);
+            for (int i = 0; i < tasks.size(); i++) {
+                if (previousStatuses.get(i)) {
+                    tasks.get(i).markAsDone();
+                } else {
+                    tasks.get(i).markAsNotDone();
+                }
+            }
             System.out.println(" " + exception.getMessage());
             return true;
         }
     }
 
     private boolean executeCommand(String inputCommand) throws ProtonException {
+        if (inputCommand.chars().anyMatch(value -> Character.isISOControl(value) && value != '\t')) {
+            throw new ProtonException("Positive charge alert! Commands cannot contain control characters.");
+        }
         if (inputCommand.isBlank()) {
             throw new ProtonException(
                     "Positive charge alert! No command was detected. Please enter a command.");
@@ -151,6 +183,7 @@ public class Proton {
     private void markTask(String inputCommand) throws ProtonException {
         Task task = tasks.get(getTaskIndexFromCommand(inputCommand, MARK_COMMAND));
         task.markAsDone();
+        saveTasks();
         System.out.println(" Nice! I've marked this task as done:");
         System.out.println("   " + task);
     }
@@ -158,6 +191,7 @@ public class Proton {
     private void unmarkTask(String inputCommand) throws ProtonException {
         Task task = tasks.get(getTaskIndexFromCommand(inputCommand, UNMARK_COMMAND));
         task.markAsNotDone();
+        saveTasks();
         System.out.println(" OK, I've marked this task as not done yet:");
         System.out.println("   " + task);
     }
@@ -170,6 +204,7 @@ public class Proton {
     private void deleteTask(String inputCommand) throws ProtonException {
         int taskIndex = getTaskIndexFromCommand(inputCommand, DELETE_COMMAND);
         Task removedTask = tasks.remove(taskIndex);
+        saveTasks();
         System.out.println(" Noted. I've removed this task:");
         System.out.println("   " + removedTask);
         System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
@@ -189,18 +224,18 @@ public class Proton {
         }
 
         try {
-            int taskIndex = Integer.parseInt(taskNumberText) - 1;
+            int taskNumber = Integer.parseInt(taskNumberText);
             if (tasks.isEmpty()) {
                 throw new ProtonException(
                         "Positive charge alert! There are no tasks in Proton's orbit yet.");
             }
 
-            if (taskIndex < 0 || taskIndex >= tasks.size()) {
+            if (taskNumber < 1 || taskNumber > tasks.size()) {
                 throw new ProtonException(
                         "Positive charge alert! Choose a task number from 1 to " + tasks.size() + ".");
             }
 
-            return taskIndex;
+            return taskNumber - 1;
         } catch (NumberFormatException exception) {
             throw new ProtonException(
                     "Positive charge alert! Use: " + command + " TASK_NUMBER");
@@ -250,11 +285,26 @@ public class Proton {
                 descriptionAndTimes[0], startAndEndTimes[0], startAndEndTimes[1]));
     }
 
-    private void addTask(Task task) {
+    private void addTask(Task task) throws ProtonException {
         tasks.add(task);
+        saveTasks();
 
         System.out.println(" Got it. I've added this task:");
         System.out.println("   " + task);
         System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
+    }
+
+    /**
+     * Saves the current list without truncating the previous file on a failed write.
+     *
+     * @throws ProtonException If storage fails; the command handler restores the previous list.
+     */
+    private void saveTasks() throws ProtonException {
+        try {
+            storage.save(tasks);
+        } catch (IOException exception) {
+            throw new ProtonException("Could not save data/proton.txt. No tasks were changed. "
+                    + "Check the path and permissions, then retry or restart.");
+        }
     }
 }
