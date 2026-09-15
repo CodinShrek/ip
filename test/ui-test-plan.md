@@ -413,9 +413,9 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
-### UI-CAPACITY-01: Reject a task beyond capacity
+### UI-CAPACITY-01: Grow beyond the former capacity
 
-Aim: Verify that Proton rejects task 101 without crashing and still accepts `bye`.
+Aim: Verify that Proton accepts task 101 and still accepts `bye`.
 
 Input:
 
@@ -1038,7 +1038,9 @@ ____________________________________________________________
  Now you have 100 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
- Positive charge alert! Proton's task nucleus is full at 100 tasks.
+ Got it. I've added this task:
+   [T][ ] task 101
+ Now you have 101 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
  Powering down for now, I'll see you next time!
@@ -1047,34 +1049,30 @@ ____________________________________________________________
 
 ## Latest test session
 
-- Timestamp: `2026-09-11 02:25:19 +08:00`
-- Result: PASS (10 of 10 cases passed)
-- Build: PASS
-- UI-TODO-01: PASS
-- UI-DEADLINE-01: PASS
-- UI-EVENT-01: PASS
-- UI-TODO-INVALID-01: PASS
-- UI-DEADLINE-INVALID-01: PASS
-- UI-EVENT-INVALID-01: PASS
-- UI-TASK-NUMBER-INVALID-01: PASS
-- UI-UNKNOWN-01: PASS
-- UI-BLANK-01: PASS
-- UI-CAPACITY-01: PASS
-- Process exit codes: `0` for all cases
-- Standard error: Empty for all cases
+Timestamp: 2026-09-16T03:09:29.874898+08:00
 
-UI-TODO-01 transcript:
+Result: PASS
+
+Java: 25.0.4
+
+### UI-TODO-01: Add and manage a ToDo task
+
+PASS; exit code: 0
+
+Input:
 
 ```text
-INPUT
 todo borrow book
 list
 mark 1
 unmark 1
 list
 bye
+```
 
-OUTPUT
+Actual stdout:
+
+```text
  ____            _              
 |  _ \ _ __ ___ | |_ ___  _ __ 
 | |_) | '__/ _ \| __/ _ \| '_ \
@@ -1111,18 +1109,29 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
-UI-DEADLINE-01 transcript:
+Stderr:
 
 ```text
-INPUT
+```
+
+### UI-DEADLINE-01: Add and manage a deadline task
+
+PASS; exit code: 0
+
+Input:
+
+```text
 deadline return book /by Sunday
 list
 mark 1
 unmark 1
 list
 bye
+```
 
-OUTPUT
+Actual stdout:
+
+```text
  ____            _              
 |  _ \ _ __ ___ | |_ ___  _ __ 
 | |_) | '__/ _ \| __/ _ \| '_ \
@@ -1159,18 +1168,29 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
-UI-EVENT-01 transcript:
+Stderr:
 
 ```text
-INPUT
+```
+
+### UI-EVENT-01: Add and manage an event task
+
+PASS; exit code: 0
+
+Input:
+
+```text
 event project meeting /from Mon 2pm /to 4pm
 list
 mark 1
 unmark 1
 list
 bye
+```
 
-OUTPUT
+Actual stdout:
+
+```text
  ____            _              
 |  _ \ _ __ ___ | |_ ___  _ __ 
 | |_) | '__/ _ \| __/ _ \| '_ \
@@ -1207,15 +1227,26 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
-UI-TODO-INVALID-01 transcript:
+Stderr:
 
 ```text
-INPUT
+```
+
+### UI-TODO-INVALID-01: Reject an empty todo
+
+PASS; exit code: 0
+
+Input:
+
+```text
 todo
 todo borrow book
 bye
+```
 
-OUTPUT
+Actual stdout:
+
+```text
  ____            _              
 |  _ \ _ __ ___ | |_ ___  _ __ 
 | |_) | '__/ _ \| __/ _ \| '_ \
@@ -1239,15 +1270,26 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
-UI-DEADLINE-INVALID-01 transcript:
+Stderr:
 
 ```text
-INPUT
+```
+
+### UI-DEADLINE-INVALID-01: Reject a malformed deadline
+
+PASS; exit code: 0
+
+Input:
+
+```text
 deadline return book
 deadline return book /by Sunday
 bye
+```
 
-OUTPUT
+Actual stdout:
+
+```text
  ____            _              
 |  _ \ _ __ ___ | |_ ___  _ __ 
 | |_) | '__/ _ \| __/ _ \| '_ \
@@ -1271,15 +1313,26 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
-UI-EVENT-INVALID-01 transcript:
+Stderr:
 
 ```text
-INPUT
+```
+
+### UI-EVENT-INVALID-01: Reject a malformed event
+
+PASS; exit code: 0
+
+Input:
+
+```text
 event project meeting /from Mon 2pm
 event project meeting /from Mon 2pm /to 4pm
 bye
+```
 
-OUTPUT
+Actual stdout:
+
+```text
  ____            _              
 |  _ \ _ __ ___ | |_ ___  _ __ 
 | |_) | '__/ _ \| __/ _ \| '_ \
@@ -1303,10 +1356,18 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
-UI-TASK-NUMBER-INVALID-01 transcript:
+Stderr:
 
 ```text
-INPUT
+```
+
+### UI-TASK-NUMBER-INVALID-01: Reject invalid task references
+
+PASS; exit code: 0
+
+Input:
+
+```text
 mark
 unmark proton
 mark 1
@@ -1314,8 +1375,11 @@ todo borrow book
 mark 2
 mark 1
 bye
+```
 
-OUTPUT
+Actual stdout:
+
+```text
  ____            _              
 |  _ \ _ __ ___ | |_ ___  _ __ 
 | |_) | '__/ _ \| __/ _ \| '_ \
@@ -1352,15 +1416,26 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
-UI-UNKNOWN-01 transcript:
+Stderr:
 
 ```text
-INPUT
+```
+
+### UI-UNKNOWN-01: Reject an unknown command
+
+PASS; exit code: 0
+
+Input:
+
+```text
 dance
 list
 bye
+```
 
-OUTPUT
+Actual stdout:
+
+```text
  ____            _              
 |  _ \ _ __ ___ | |_ ___  _ __ 
 | |_) | '__/ _ \| __/ _ \| '_ \
@@ -1382,10 +1457,55 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
-UI-CAPACITY-01 transcript:
+Stderr:
 
 ```text
-INPUT
+```
+
+### UI-BLANK-01: Reject a blank command
+
+PASS; exit code: 0
+
+Input:
+
+```text
+
+bye
+```
+
+Actual stdout:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! No command was detected. Please enter a command.
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+Stderr:
+
+```text
+```
+
+### UI-CAPACITY-01: Grow beyond the former capacity
+
+PASS; exit code: 0
+
+Input:
+
+```text
 todo task 1
 todo task 2
 todo task 3
@@ -1488,8 +1608,11 @@ todo task 99
 todo task 100
 todo task 101
 bye
+```
 
-OUTPUT
+Actual stdout:
+
+```text
  ____            _              
 |  _ \ _ __ ___ | |_ ___  _ __ 
 | |_) | '__/ _ \| __/ _ \| '_ \
@@ -2001,35 +2124,16 @@ ____________________________________________________________
  Now you have 100 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
- Positive charge alert! Proton's task nucleus is full at 100 tasks.
+ Got it. I've added this task:
+   [T][ ] task 101
+ Now you have 101 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
  Powering down for now, I'll see you next time!
 ____________________________________________________________
 ```
 
-UI-BLANK-01 transcript:
+Stderr:
 
 ```text
-INPUT
-
-bye
-
-OUTPUT
- ____            _              
-|  _ \ _ __ ___ | |_ ___  _ __ 
-| |_) | '__/ _ \| __/ _ \| '_ \
-|  __/| | | (_) | || (_) | | | |
-|_|   |_|  \___/ \__\___/|_| |_|
-
-____________________________________________________________
-Hey there! I'm Proton, your positively charged chatbot!
-I'm fired up and ready to help! What awesome thing shall we tackle today?
-____________________________________________________________
-____________________________________________________________
- Positive charge alert! No command was detected. Please enter a command.
-____________________________________________________________
-____________________________________________________________
- Powering down for now, I'll see you next time!
-____________________________________________________________
 ```

@@ -6,13 +6,13 @@ import proton.task.Event;
 import proton.task.Task;
 import proton.task.Todo;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
  * Runs the Proton chatbot and manages the user's task list.
  */
 public class Proton {
-    private static final int MAX_TASK_COUNT = 100;
     private static final String BANNER = " ____            _              \n"
             + "|  _ \\ _ __ ___ | |_ ___  _ __ \n"
             + "| |_) | '__/ _ \\| __/ _ \\| '_ \\\n"
@@ -35,8 +35,7 @@ public class Proton {
     private static final String EVENT_START_DELIMITER = " /from ";
     private static final String EVENT_END_DELIMITER = " /to ";
 
-    private final Task[] tasks = new Task[MAX_TASK_COUNT];
-    private int taskCount;
+    private final ArrayList<Task> tasks = new ArrayList<>();
 
     /**
      * Starts Proton and processes commands from the standard input stream.
@@ -136,8 +135,8 @@ public class Proton {
 
     private void listTasks() {
         System.out.println(" Here are the tasks in your list:");
-        for (int i = 0; i < taskCount; i++) {
-            System.out.println(" " + (i + 1) + "." + tasks[i]);
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println(" " + (i + 1) + "." + tasks.get(i));
         }
     }
 
@@ -170,17 +169,17 @@ public class Proton {
 
         try {
             int taskIndex = Integer.parseInt(taskNumberText) - 1;
-            if (taskCount == 0) {
+            if (tasks.isEmpty()) {
                 throw new ProtonException(
                         "Positive charge alert! There are no tasks in Proton's orbit yet.");
             }
 
-            if (taskIndex < 0 || taskIndex >= taskCount) {
+            if (taskIndex < 0 || taskIndex >= tasks.size()) {
                 throw new ProtonException(
-                        "Positive charge alert! Choose a task number from 1 to " + taskCount + ".");
+                        "Positive charge alert! Choose a task number from 1 to " + tasks.size() + ".");
             }
 
-            return tasks[taskIndex];
+            return tasks.get(taskIndex);
         } catch (NumberFormatException exception) {
             throw new ProtonException(
                     "Positive charge alert! Use: " + command + " TASK_NUMBER");
@@ -230,18 +229,11 @@ public class Proton {
                 descriptionAndTimes[0], startAndEndTimes[0], startAndEndTimes[1]));
     }
 
-    private void addTask(Task task) throws ProtonException {
-        if (taskCount >= MAX_TASK_COUNT) {
-            throw new ProtonException(
-                    "Positive charge alert! Proton's task nucleus is full at "
-                            + MAX_TASK_COUNT + " tasks.");
-        }
-
-        tasks[taskCount] = task;
-        taskCount++;
+    private void addTask(Task task) {
+        tasks.add(task);
 
         System.out.println(" Got it. I've added this task:");
         System.out.println("   " + task);
-        System.out.println(" Now you have " + taskCount + " tasks in the list.");
+        System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
     }
 }
