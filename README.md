@@ -24,7 +24,7 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
 
 **Warning:** Keep the `src\main\java` folder as the root folder for Java files (i.e., don't rename those folders or move Java files to another folder outside of this folder path), as this is the default location some tools (e.g., Gradle) expect to find Java files.
 
-## Task saving
+## Task persistence
 
 Run Proton from the project root. Adding, marking, unmarking, or deleting a task
 automatically overwrites `data/proton.txt`, creating `data/` if needed. The UTF-8
@@ -32,5 +32,11 @@ file contains one task per line in the same format as the task list, including
 its type, completion status, and any dates or times. Deleting the last task
 leaves an empty file.
 
-Loading is not implemented yet: each launch starts with an empty task list,
-and the first change replaces the previous save.
+On startup, Proton loads the saved tasks, including their types, completion
+status, and dates or times. A missing or empty file starts an empty list.
+If the file cannot be read or contains a malformed task, Proton reports the
+problem and stops before accepting commands, preserving the saved file.
+
+The display-based format is intended for ordinary task text. Avoid embedding
+the formatting markers ` (by: `, ` (from: `, and ` to: ` in task fields: they
+can make the boundaries between saved fields ambiguous.

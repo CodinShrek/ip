@@ -109,9 +109,33 @@ def main():
             continue
         inputs, expected = re.findall(r'```text\n(.*?)```', body, re.S)[:2]
         checkpoint = re.search(r'```json\n(.*?)```', body, re.S)
-        snapshots = json.loads(checkpoint[1]) if checkpoint else None
+        configuration = json.loads(checkpoint[1]) if checkpoint else None
+        options = configuration if isinstance(configuration, dict) else {}
+        snapshots = options.get('snapshots') if options else configuration
+        restart_record = ''
         with TemporaryDirectory(prefix='ui-', dir=ROOT / '_temp') as directory:
+            save_file = Path(directory) / 'data/proton.txt'
+            if 'initial_save' in options:
+                save_file.parent.mkdir()
+                save_file.write_text(options['initial_save'], encoding='utf-8')
             actual, stderr, code, checks = run_case(inputs, expected, snapshots, directory)
+            if 'unchanged_save' in options:
+                if save_file.read_text(encoding='utf-8') != options['unchanged_save']:
+                    checks += '\nFAIL: Startup changed the save file.'
+                else:
+                    checks += '\nStartup preserved the save file: PASS'
+            if (options.get('restart_expected') and actual == expected
+                    and not stderr and code == 0 and 'FAIL:' not in checks):
+                restart_input = 'list\nbye\n'
+                output, errors, result, _ = run_case(
+                    restart_input, options['restart_expected'], None, directory)
+                restart_record = (f'\nRestart input:\n\n```text\n{restart_input}```\n\n'
+                                  f'Restart stdout:\n\n```text\n{output}```\n\n'
+                                  f'Restart stderr:\n\n```text\n{errors}```\n\nRestart exit code: {result}\n')
+                if output != options['restart_expected'] or errors or result != 0:
+                    checks += '\nFAIL: Restart output mismatch.'
+                else:
+                    checks += '\nRestart restored the saved list: PASS'
         failed = actual != expected or bool(stderr) or code != 0 or 'FAIL:' in checks
         status = 'FAIL' if failed else 'PASS'
         print(name.split(':')[0], status)
@@ -119,6 +143,7 @@ def main():
                   f'Actual stdout:\n\n```text\n{actual}```\n\nStderr:\n\n```text\n{stderr}```\n')
         if checks:
             record += f'\nSave checks:\n\n```text\n{checks}\n```\n'
+        record += restart_record
         if failed:
             record += f'\nExpected output:\n\n```text\n{expected}```\n'
         records.append(record)

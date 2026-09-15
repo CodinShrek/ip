@@ -13,9 +13,9 @@ This file is maintained by the project-specific `$test-ui` skill.
 - Automated Java launch: `java -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -cp <absolute out path> proton.Proton`
 - Automated runner: `python test/run_ui.py` (builds once with Java 25).
 - Test working directory: A fresh temporary directory under `_temp/` for each case; compiled classes use an absolute path.
-- Preconditions: Start each case with a fresh Proton process, an empty in-memory task list, and no data directory. This isolates tests from real saved tasks.
+- Preconditions: Start each case with a fresh Proton process, an empty in-memory task list, and no data directory unless a case supplies initial_save. This isolates tests from real saved tasks.
 - Save checks: UI-SAVE-01 checks exact UTF-8 file contents after every command response while the process remains running; `null` means the file must not exist. Normalize only line endings.
-- Scope: Saving only; startup loading is deferred. Each mutation overwrites `data/proton.txt` using one displayed task per line.
+- Scope: Load tasks on startup and save after each mutation. JSON objects can specify initial_save, per-command snapshots, unchanged_save, and restart_expected. Restart checks launch a second process in the same isolated directory with exactly `list` and `bye`; compare its entire stdout, stderr, and exit code.
 
 ## Test cases
 
@@ -1366,9 +1366,172 @@ Expected save file after each input line (JSON strings):
 ]
 ```
 
+### UI-LOAD-01: Restore and modify saved tasks across restarts
+
+Aim: Restore all task types, status, order, dates, and Unicode; modify the loaded list and verify another process restores the saved changes.
+
+Input:
+
+```text
+list
+unmark 1
+mark 2
+delete 3
+event lunch /from noon /to 1pm
+list
+bye
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[T][X] café | book
+ 2.[D][ ] submit (by: Friday)
+ 3.[E][X] meeting (from: 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ OK, I've marked this task as not done yet:
+   [T][ ] café | book
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [D][X] submit (by: Friday)
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [E][X] meeting (from: 2pm to: 4pm)
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [E][ ] lunch (from: noon to: 1pm)
+ Now you have 3 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[T][ ] café | book
+ 2.[D][X] submit (by: Friday)
+ 3.[E][ ] lunch (from: noon to: 1pm)
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+Storage configuration (exact UTF-8 contents and restart expectations):
+
+```json
+{
+  "initial_save": "[T][X] café | book\n[D][ ] submit (by: Friday)\n[E][X] meeting (from: 2pm to: 4pm)\n",
+  "snapshots": [
+    "[T][X] café | book\n[D][ ] submit (by: Friday)\n[E][X] meeting (from: 2pm to: 4pm)\n",
+    "[T][ ] café | book\n[D][ ] submit (by: Friday)\n[E][X] meeting (from: 2pm to: 4pm)\n",
+    "[T][ ] café | book\n[D][X] submit (by: Friday)\n[E][X] meeting (from: 2pm to: 4pm)\n",
+    "[T][ ] café | book\n[D][X] submit (by: Friday)\n",
+    "[T][ ] café | book\n[D][X] submit (by: Friday)\n[E][ ] lunch (from: noon to: 1pm)\n",
+    "[T][ ] café | book\n[D][X] submit (by: Friday)\n[E][ ] lunch (from: noon to: 1pm)\n",
+    "[T][ ] café | book\n[D][X] submit (by: Friday)\n[E][ ] lunch (from: noon to: 1pm)\n"
+  ],
+  "restart_expected": " ____            _              \n|  _ \\ _ __ ___ | |_ ___  _ __ \n| |_) | '__/ _ \\| __/ _ \\| '_ \\\n|  __/| | | (_) | || (_) | | | |\n|_|   |_|  \\___/ \\__\\___/|_| |_|\n\n____________________________________________________________\nHey there! I'm Proton, your positively charged chatbot!\nI'm fired up and ready to help! What awesome thing shall we tackle today?\n____________________________________________________________\n____________________________________________________________\n Here are the tasks in your list:\n 1.[T][ ] café | book\n 2.[D][X] submit (by: Friday)\n 3.[E][ ] lunch (from: noon to: 1pm)\n____________________________________________________________\n____________________________________________________________\n Powering down for now, I'll see you next time!\n____________________________________________________________\n"
+}
+```
+
+### UI-LOAD-EMPTY-01: Load an empty save file
+
+Aim: Start with an empty list and preserve the zero-byte file.
+
+Input:
+
+```text
+list
+bye
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+Storage configuration (exact UTF-8 contents and restart expectations):
+
+```json
+{
+  "initial_save": "",
+  "snapshots": [
+    "",
+    ""
+  ],
+  "restart_expected": " ____            _              \n|  _ \\ _ __ ___ | |_ ___  _ __ \n| |_) | '__/ _ \\| __/ _ \\| '_ \\\n|  __/| | | (_) | || (_) | | | |\n|_|   |_|  \\___/ \\__\\___/|_| |_|\n\n____________________________________________________________\nHey there! I'm Proton, your positively charged chatbot!\nI'm fired up and ready to help! What awesome thing shall we tackle today?\n____________________________________________________________\n____________________________________________________________\n Here are the tasks in your list:\n____________________________________________________________\n____________________________________________________________\n Powering down for now, I'll see you next time!\n____________________________________________________________\n"
+}
+```
+
+### UI-LOAD-INVALID-01: Preserve a malformed save file
+
+Aim: Stop before accepting a mutation when a later saved line is malformed, preserving the whole original file.
+
+Input:
+
+```text
+todo must not overwrite
+bye
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+ Proton could not load data/proton.txt. Check the file and restart.
+```
+
+Storage configuration (exact UTF-8 contents and restart expectations):
+
+```json
+{
+  "initial_save": "[T][ ] valid task\nnot a saved task\n",
+  "unchanged_save": "[T][ ] valid task\nnot a saved task\n"
+}
+```
+
 ## Latest test session
 
-Timestamp: 2026-09-16T03:30:36.312335+08:00
+Timestamp: 2026-09-16T03:39:40.522463+08:00
 
 Result: PASS
 
@@ -2781,4 +2944,243 @@ delete 1: PASS; save file = "[D][ ] submit (by: Friday)\n[E][ ] meeting (from: 2
 delete 2: PASS; save file = "[D][ ] submit (by: Friday)\n"
 delete 1: PASS; save file = ""
 bye: PASS; save file = ""
+```
+
+### UI-LOAD-01: Restore and modify saved tasks across restarts
+
+PASS; exit code: 0
+
+Input:
+
+```text
+list
+unmark 1
+mark 2
+delete 3
+event lunch /from noon /to 1pm
+list
+bye
+```
+
+Actual stdout:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[T][X] café | book
+ 2.[D][ ] submit (by: Friday)
+ 3.[E][X] meeting (from: 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ OK, I've marked this task as not done yet:
+   [T][ ] café | book
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [D][X] submit (by: Friday)
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [E][X] meeting (from: 2pm to: 4pm)
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [E][ ] lunch (from: noon to: 1pm)
+ Now you have 3 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[T][ ] café | book
+ 2.[D][X] submit (by: Friday)
+ 3.[E][ ] lunch (from: noon to: 1pm)
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+Stderr:
+
+```text
+```
+
+Save checks:
+
+```text
+list: PASS; save file = "[T][X] café | book\n[D][ ] submit (by: Friday)\n[E][X] meeting (from: 2pm to: 4pm)\n"
+unmark 1: PASS; save file = "[T][ ] café | book\n[D][ ] submit (by: Friday)\n[E][X] meeting (from: 2pm to: 4pm)\n"
+mark 2: PASS; save file = "[T][ ] café | book\n[D][X] submit (by: Friday)\n[E][X] meeting (from: 2pm to: 4pm)\n"
+delete 3: PASS; save file = "[T][ ] café | book\n[D][X] submit (by: Friday)\n"
+event lunch /from noon /to 1pm: PASS; save file = "[T][ ] café | book\n[D][X] submit (by: Friday)\n[E][ ] lunch (from: noon to: 1pm)\n"
+list: PASS; save file = "[T][ ] café | book\n[D][X] submit (by: Friday)\n[E][ ] lunch (from: noon to: 1pm)\n"
+bye: PASS; save file = "[T][ ] café | book\n[D][X] submit (by: Friday)\n[E][ ] lunch (from: noon to: 1pm)\n"
+Restart restored the saved list: PASS
+```
+
+Restart input:
+
+```text
+list
+bye
+```
+
+Restart stdout:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[T][ ] café | book
+ 2.[D][X] submit (by: Friday)
+ 3.[E][ ] lunch (from: noon to: 1pm)
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+Restart stderr:
+
+```text
+```
+
+Restart exit code: 0
+
+### UI-LOAD-EMPTY-01: Load an empty save file
+
+PASS; exit code: 0
+
+Input:
+
+```text
+list
+bye
+```
+
+Actual stdout:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+Stderr:
+
+```text
+```
+
+Save checks:
+
+```text
+list: PASS; save file = ""
+bye: PASS; save file = ""
+Restart restored the saved list: PASS
+```
+
+Restart input:
+
+```text
+list
+bye
+```
+
+Restart stdout:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+Restart stderr:
+
+```text
+```
+
+Restart exit code: 0
+
+### UI-LOAD-INVALID-01: Preserve a malformed save file
+
+PASS; exit code: 0
+
+Input:
+
+```text
+todo must not overwrite
+bye
+```
+
+Actual stdout:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+ Proton could not load data/proton.txt. Check the file and restart.
+```
+
+Stderr:
+
+```text
+```
+
+Save checks:
+
+```text
+
+Startup preserved the save file: PASS
 ```

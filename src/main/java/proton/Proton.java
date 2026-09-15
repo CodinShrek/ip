@@ -9,9 +9,12 @@ import proton.task.Todo;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Runs the Proton chatbot and manages the user's task list.
@@ -55,6 +58,12 @@ public class Proton {
 
     private void run() {
         printWelcomeMessage();
+        try {
+            loadTasks();
+        } catch (IOException | IllegalArgumentException exception) {
+            System.out.println(" Proton could not load data/proton.txt. Check the file and restart.");
+            return;
+        }
 
         Scanner scanner = new Scanner(System.in);
         boolean shouldContinue = true;
@@ -265,6 +274,58 @@ public class Proton {
         System.out.println(" Got it. I've added this task:");
         System.out.println("   " + task);
         System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
+    }
+
+    /**
+     * Loads saved tasks in order before accepting commands. A missing file means a new task list.
+     *
+     * @throws IOException If an existing save file cannot be read.
+     * @throws IllegalArgumentException If a saved task has an invalid format.
+     */
+    private void loadTasks() throws IOException {
+        try {
+            for (String line : Files.readAllLines(SAVE_FILE)) {
+                tasks.add(parseSavedTask(line));
+            }
+        } catch (NoSuchFileException exception) {
+            // There is no saved list on the first run.
+        }
+    }
+
+    /**
+     * Restores a task's type, details, and completion status from its saved display format.
+     *
+     * @throws IllegalArgumentException If the line does not describe a supported task.
+     */
+    private Task parseSavedTask(String line) {
+        Matcher taskMatcher = Pattern.compile("\\[([TDE])\\]\\[([ X])\\] (.+)").matcher(line);
+        if (!taskMatcher.matches()) {
+            throw new IllegalArgumentException("Invalid saved task.");
+        }
+
+        String type = taskMatcher.group(1);
+        String details = taskMatcher.group(3);
+        Task task;
+        if (type.equals("T")) {
+            task = new Todo(details);
+        } else if (type.equals("D")) {
+            Matcher deadlineMatcher = Pattern.compile("(.+) \\(by: (.+)\\)").matcher(details);
+            if (!deadlineMatcher.matches()) {
+                throw new IllegalArgumentException("Invalid saved deadline.");
+            }
+            task = new Deadline(deadlineMatcher.group(1), deadlineMatcher.group(2));
+        } else {
+            Matcher eventMatcher = Pattern.compile("(.+) \\(from: (.+?) to: (.+)\\)").matcher(details);
+            if (!eventMatcher.matches()) {
+                throw new IllegalArgumentException("Invalid saved event.");
+            }
+            task = new Event(eventMatcher.group(1), eventMatcher.group(2), eventMatcher.group(3));
+        }
+
+        if (taskMatcher.group(2).equals("X")) {
+            task.markAsDone();
+        }
+        return task;
     }
 
     /**
