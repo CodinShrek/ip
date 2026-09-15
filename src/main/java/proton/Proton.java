@@ -23,11 +23,13 @@ public class Proton {
     private static final String LIST_COMMAND = "list";
     private static final String MARK_COMMAND = "mark";
     private static final String UNMARK_COMMAND = "unmark";
+    private static final String DELETE_COMMAND = "delete";
     private static final String TODO_COMMAND = "todo";
     private static final String DEADLINE_COMMAND = "deadline";
     private static final String EVENT_COMMAND = "event";
     private static final String MARK_COMMAND_PREFIX = MARK_COMMAND + " ";
     private static final String UNMARK_COMMAND_PREFIX = UNMARK_COMMAND + " ";
+    private static final String DELETE_COMMAND_PREFIX = DELETE_COMMAND + " ";
     private static final String TODO_COMMAND_PREFIX = TODO_COMMAND + " ";
     private static final String DEADLINE_COMMAND_PREFIX = DEADLINE_COMMAND + " ";
     private static final String EVENT_COMMAND_PREFIX = EVENT_COMMAND + " ";
@@ -106,6 +108,12 @@ public class Proton {
             return true;
         }
 
+        if (inputCommand.equals(DELETE_COMMAND)
+                || inputCommand.startsWith(DELETE_COMMAND_PREFIX)) {
+            deleteTask(inputCommand);
+            return true;
+        }
+
         processTaskCreationCommand(inputCommand);
         return true;
     }
@@ -141,26 +149,39 @@ public class Proton {
     }
 
     private void markTask(String inputCommand) throws ProtonException {
-        Task task = getTaskFromCommand(inputCommand, MARK_COMMAND);
+        Task task = tasks.get(getTaskIndexFromCommand(inputCommand, MARK_COMMAND));
         task.markAsDone();
         System.out.println(" Nice! I've marked this task as done:");
         System.out.println("   " + task);
     }
 
     private void unmarkTask(String inputCommand) throws ProtonException {
-        Task task = getTaskFromCommand(inputCommand, UNMARK_COMMAND);
+        Task task = tasks.get(getTaskIndexFromCommand(inputCommand, UNMARK_COMMAND));
         task.markAsNotDone();
         System.out.println(" OK, I've marked this task as not done yet:");
         System.out.println("   " + task);
     }
 
     /**
-     * Finds the task referenced by a command containing a one-based task number.
+     * Removes the selected task and reports its details and the remaining count.
      *
-     * @return The matching task.
+     * @throws ProtonException If the command does not identify an existing task.
+     */
+    private void deleteTask(String inputCommand) throws ProtonException {
+        int taskIndex = getTaskIndexFromCommand(inputCommand, DELETE_COMMAND);
+        Task removedTask = tasks.remove(taskIndex);
+        System.out.println(" Noted. I've removed this task:");
+        System.out.println("   " + removedTask);
+        System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
+    }
+
+    /**
+     * Finds the zero-based index referenced by a command containing a one-based task number.
+     *
+     * @return The index of the matching task.
      * @throws ProtonException If the command does not contain an existing task number.
      */
-    private Task getTaskFromCommand(String inputCommand, String command) throws ProtonException {
+    private int getTaskIndexFromCommand(String inputCommand, String command) throws ProtonException {
         String taskNumberText = inputCommand.substring(command.length()).trim();
         if (taskNumberText.isBlank()) {
             throw new ProtonException(
@@ -179,7 +200,7 @@ public class Proton {
                         "Positive charge alert! Choose a task number from 1 to " + tasks.size() + ".");
             }
 
-            return tasks.get(taskIndex);
+            return taskIndex;
         } catch (NumberFormatException exception) {
             throw new ProtonException(
                     "Positive charge alert! Use: " + command + " TASK_NUMBER");

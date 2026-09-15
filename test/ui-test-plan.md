@@ -1047,9 +1047,227 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+### UI-DELETE-01: Delete tasks and use renumbered indices
+
+Aim: Verify middle, last, first, and only-task deletion across task types, then add again.
+
+Input:
+
+```text
+todo read book
+deadline return book /by Sunday
+event meeting /from 2pm /to 4pm
+todo read book
+delete 2
+list
+mark 2
+unmark 2
+delete 3
+list
+delete 1
+list
+delete 1
+list
+deadline return book /by Sunday
+mark 1
+delete 1
+bye
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] read book
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [D][ ] return book (by: Sunday)
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [E][ ] meeting (from: 2pm to: 4pm)
+ Now you have 3 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] read book
+ Now you have 4 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [D][ ] return book (by: Sunday)
+ Now you have 3 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[T][ ] read book
+ 2.[E][ ] meeting (from: 2pm to: 4pm)
+ 3.[T][ ] read book
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [E][X] meeting (from: 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ OK, I've marked this task as not done yet:
+   [E][ ] meeting (from: 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [T][ ] read book
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[T][ ] read book
+ 2.[E][ ] meeting (from: 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [T][ ] read book
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[E][ ] meeting (from: 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [E][ ] meeting (from: 2pm to: 4pm)
+ Now you have 0 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [D][ ] return book (by: Sunday)
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [D][X] return book (by: Sunday)
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [D][X] return book (by: Sunday)
+ Now you have 0 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+### UI-DELETE-INVALID-01: Reject invalid deletion requests
+
+Aim: Verify invalid requests leave tasks intact and allow later valid deletion.
+
+Input:
+
+```text
+delete
+delete 1
+todo read book
+delete 
+delete abc
+delete 1 2
+delete 0
+delete -1
+delete 2
+delete 2147483648
+delete -2147483648
+delete1
+list
+delete   1  
+list
+bye
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: delete TASK_NUMBER
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! There are no tasks in Proton's orbit yet.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] read book
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: delete TASK_NUMBER
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: delete TASK_NUMBER
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: delete TASK_NUMBER
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Choose a task number from 1 to 1.
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Choose a task number from 1 to 1.
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Choose a task number from 1 to 1.
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: delete TASK_NUMBER
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Choose a task number from 1 to 1.
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! That command is outside Proton's orbit.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[T][ ] read book
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [T][ ] read book
+ Now you have 0 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
 ## Latest test session
 
-Timestamp: 2026-09-16T03:09:29.874898+08:00
+Timestamp: 2026-09-16T03:14:30.832590+08:00
 
 Result: PASS
 
@@ -2127,6 +2345,234 @@ ____________________________________________________________
  Got it. I've added this task:
    [T][ ] task 101
  Now you have 101 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+Stderr:
+
+```text
+```
+
+### UI-DELETE-01: Delete tasks and use renumbered indices
+
+PASS; exit code: 0
+
+Input:
+
+```text
+todo read book
+deadline return book /by Sunday
+event meeting /from 2pm /to 4pm
+todo read book
+delete 2
+list
+mark 2
+unmark 2
+delete 3
+list
+delete 1
+list
+delete 1
+list
+deadline return book /by Sunday
+mark 1
+delete 1
+bye
+```
+
+Actual stdout:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] read book
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [D][ ] return book (by: Sunday)
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [E][ ] meeting (from: 2pm to: 4pm)
+ Now you have 3 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] read book
+ Now you have 4 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [D][ ] return book (by: Sunday)
+ Now you have 3 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[T][ ] read book
+ 2.[E][ ] meeting (from: 2pm to: 4pm)
+ 3.[T][ ] read book
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [E][X] meeting (from: 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ OK, I've marked this task as not done yet:
+   [E][ ] meeting (from: 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [T][ ] read book
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[T][ ] read book
+ 2.[E][ ] meeting (from: 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [T][ ] read book
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[E][ ] meeting (from: 2pm to: 4pm)
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [E][ ] meeting (from: 2pm to: 4pm)
+ Now you have 0 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [D][ ] return book (by: Sunday)
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [D][X] return book (by: Sunday)
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [D][X] return book (by: Sunday)
+ Now you have 0 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+Stderr:
+
+```text
+```
+
+### UI-DELETE-INVALID-01: Reject invalid deletion requests
+
+PASS; exit code: 0
+
+Input:
+
+```text
+delete
+delete 1
+todo read book
+delete 
+delete abc
+delete 1 2
+delete 0
+delete -1
+delete 2
+delete 2147483648
+delete -2147483648
+delete1
+list
+delete   1  
+list
+bye
+```
+
+Actual stdout:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: delete TASK_NUMBER
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! There are no tasks in Proton's orbit yet.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] read book
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: delete TASK_NUMBER
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: delete TASK_NUMBER
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: delete TASK_NUMBER
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Choose a task number from 1 to 1.
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Choose a task number from 1 to 1.
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Choose a task number from 1 to 1.
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: delete TASK_NUMBER
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Choose a task number from 1 to 1.
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! That command is outside Proton's orbit.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+ 1.[T][ ] read book
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [T][ ] read book
+ Now you have 0 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
 ____________________________________________________________
 ____________________________________________________________
  Powering down for now, I'll see you next time!
