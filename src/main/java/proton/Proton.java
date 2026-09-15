@@ -6,13 +6,13 @@ import proton.task.Event;
 import proton.task.Task;
 import proton.task.Todo;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
  * Runs the Proton chatbot and manages the user's task list.
  */
 public class Proton {
-    private static final int MAX_TASK_COUNT = 100;
     private static final String BANNER = " ____            _              \n"
             + "|  _ \\ _ __ ___ | |_ ___  _ __ \n"
             + "| |_) | '__/ _ \\| __/ _ \\| '_ \\\n"
@@ -23,11 +23,13 @@ public class Proton {
     private static final String LIST_COMMAND = "list";
     private static final String MARK_COMMAND = "mark";
     private static final String UNMARK_COMMAND = "unmark";
+    private static final String DELETE_COMMAND = "delete";
     private static final String TODO_COMMAND = "todo";
     private static final String DEADLINE_COMMAND = "deadline";
     private static final String EVENT_COMMAND = "event";
     private static final String MARK_COMMAND_PREFIX = MARK_COMMAND + " ";
     private static final String UNMARK_COMMAND_PREFIX = UNMARK_COMMAND + " ";
+    private static final String DELETE_COMMAND_PREFIX = DELETE_COMMAND + " ";
     private static final String TODO_COMMAND_PREFIX = TODO_COMMAND + " ";
     private static final String DEADLINE_COMMAND_PREFIX = DEADLINE_COMMAND + " ";
     private static final String EVENT_COMMAND_PREFIX = EVENT_COMMAND + " ";
@@ -35,8 +37,7 @@ public class Proton {
     private static final String EVENT_START_DELIMITER = " /from ";
     private static final String EVENT_END_DELIMITER = " /to ";
 
-    private final Task[] tasks = new Task[MAX_TASK_COUNT];
-    private int taskCount;
+    private final ArrayList<Task> tasks = new ArrayList<>();
 
     /**
      * Starts Proton and processes commands from the standard input stream.
@@ -107,6 +108,12 @@ public class Proton {
             return true;
         }
 
+        if (inputCommand.equals(DELETE_COMMAND)
+                || inputCommand.startsWith(DELETE_COMMAND_PREFIX)) {
+            deleteTask(inputCommand);
+            return true;
+        }
+
         processTaskCreationCommand(inputCommand);
         return true;
     }
@@ -136,32 +143,45 @@ public class Proton {
 
     private void listTasks() {
         System.out.println(" Here are the tasks in your list:");
-        for (int i = 0; i < taskCount; i++) {
-            System.out.println(" " + (i + 1) + "." + tasks[i]);
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println(" " + (i + 1) + "." + tasks.get(i));
         }
     }
 
     private void markTask(String inputCommand) throws ProtonException {
-        Task task = getTaskFromCommand(inputCommand, MARK_COMMAND);
+        Task task = tasks.get(getTaskIndexFromCommand(inputCommand, MARK_COMMAND));
         task.markAsDone();
         System.out.println(" Nice! I've marked this task as done:");
         System.out.println("   " + task);
     }
 
     private void unmarkTask(String inputCommand) throws ProtonException {
-        Task task = getTaskFromCommand(inputCommand, UNMARK_COMMAND);
+        Task task = tasks.get(getTaskIndexFromCommand(inputCommand, UNMARK_COMMAND));
         task.markAsNotDone();
         System.out.println(" OK, I've marked this task as not done yet:");
         System.out.println("   " + task);
     }
 
     /**
-     * Finds the task referenced by a command containing a one-based task number.
+     * Removes the selected task and reports its details and the remaining count.
      *
-     * @return The matching task.
+     * @throws ProtonException If the command does not identify an existing task.
+     */
+    private void deleteTask(String inputCommand) throws ProtonException {
+        int taskIndex = getTaskIndexFromCommand(inputCommand, DELETE_COMMAND);
+        Task removedTask = tasks.remove(taskIndex);
+        System.out.println(" Noted. I've removed this task:");
+        System.out.println("   " + removedTask);
+        System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
+    }
+
+    /**
+     * Finds the zero-based index referenced by a command containing a one-based task number.
+     *
+     * @return The index of the matching task.
      * @throws ProtonException If the command does not contain an existing task number.
      */
-    private Task getTaskFromCommand(String inputCommand, String command) throws ProtonException {
+    private int getTaskIndexFromCommand(String inputCommand, String command) throws ProtonException {
         String taskNumberText = inputCommand.substring(command.length()).trim();
         if (taskNumberText.isBlank()) {
             throw new ProtonException(
@@ -170,17 +190,17 @@ public class Proton {
 
         try {
             int taskIndex = Integer.parseInt(taskNumberText) - 1;
-            if (taskCount == 0) {
+            if (tasks.isEmpty()) {
                 throw new ProtonException(
                         "Positive charge alert! There are no tasks in Proton's orbit yet.");
             }
 
-            if (taskIndex < 0 || taskIndex >= taskCount) {
+            if (taskIndex < 0 || taskIndex >= tasks.size()) {
                 throw new ProtonException(
-                        "Positive charge alert! Choose a task number from 1 to " + taskCount + ".");
+                        "Positive charge alert! Choose a task number from 1 to " + tasks.size() + ".");
             }
 
-            return tasks[taskIndex];
+            return taskIndex;
         } catch (NumberFormatException exception) {
             throw new ProtonException(
                     "Positive charge alert! Use: " + command + " TASK_NUMBER");
@@ -230,18 +250,11 @@ public class Proton {
                 descriptionAndTimes[0], startAndEndTimes[0], startAndEndTimes[1]));
     }
 
-    private void addTask(Task task) throws ProtonException {
-        if (taskCount >= MAX_TASK_COUNT) {
-            throw new ProtonException(
-                    "Positive charge alert! Proton's task nucleus is full at "
-                            + MAX_TASK_COUNT + " tasks.");
-        }
-
-        tasks[taskCount] = task;
-        taskCount++;
+    private void addTask(Task task) {
+        tasks.add(task);
 
         System.out.println(" Got it. I've added this task:");
         System.out.println("   " + task);
-        System.out.println(" Now you have " + taskCount + " tasks in the list.");
+        System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
     }
 }
