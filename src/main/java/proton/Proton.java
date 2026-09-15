@@ -6,6 +6,10 @@ import proton.task.Event;
 import proton.task.Task;
 import proton.task.Todo;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -13,6 +17,7 @@ import java.util.Scanner;
  * Runs the Proton chatbot and manages the user's task list.
  */
 public class Proton {
+    private static final Path SAVE_FILE = Path.of("data", "proton.txt");
     private static final String BANNER = " ____            _              \n"
             + "|  _ \\ _ __ ___ | |_ ___  _ __ \n"
             + "| |_) | '__/ _ \\| __/ _ \\| '_ \\\n"
@@ -151,6 +156,7 @@ public class Proton {
     private void markTask(String inputCommand) throws ProtonException {
         Task task = tasks.get(getTaskIndexFromCommand(inputCommand, MARK_COMMAND));
         task.markAsDone();
+        saveTasks();
         System.out.println(" Nice! I've marked this task as done:");
         System.out.println("   " + task);
     }
@@ -158,6 +164,7 @@ public class Proton {
     private void unmarkTask(String inputCommand) throws ProtonException {
         Task task = tasks.get(getTaskIndexFromCommand(inputCommand, UNMARK_COMMAND));
         task.markAsNotDone();
+        saveTasks();
         System.out.println(" OK, I've marked this task as not done yet:");
         System.out.println("   " + task);
     }
@@ -170,6 +177,7 @@ public class Proton {
     private void deleteTask(String inputCommand) throws ProtonException {
         int taskIndex = getTaskIndexFromCommand(inputCommand, DELETE_COMMAND);
         Task removedTask = tasks.remove(taskIndex);
+        saveTasks();
         System.out.println(" Noted. I've removed this task:");
         System.out.println("   " + removedTask);
         System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
@@ -250,11 +258,31 @@ public class Proton {
                 descriptionAndTimes[0], startAndEndTimes[0], startAndEndTimes[1]));
     }
 
-    private void addTask(Task task) {
+    private void addTask(Task task) throws ProtonException {
         tasks.add(task);
+        saveTasks();
 
         System.out.println(" Got it. I've added this task:");
         System.out.println("   " + task);
         System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
+    }
+
+    /**
+     * Overwrites the UTF-8 save file with one displayed task per line, creating its directory if needed.
+     *
+     * @throws ProtonException If the updated list cannot be saved.
+     */
+    private void saveTasks() throws ProtonException {
+        try {
+            Files.createDirectories(SAVE_FILE.getParent());
+            try (BufferedWriter writer = Files.newBufferedWriter(SAVE_FILE)) {
+                for (Task task : tasks) {
+                    writer.write(task.toString());
+                    writer.newLine();
+                }
+            }
+        } catch (IOException exception) {
+            throw new ProtonException("The task list changed, but Proton could not save it to " + SAVE_FILE + ".");
+        }
     }
 }

@@ -6,11 +6,16 @@ This file is maintained by the project-specific `$test-ui` skill.
 
 - Program build command: `javac -d out src\main\java\proton\task\Task.java src\main\java\proton\task\Todo.java src\main\java\proton\task\Deadline.java src\main\java\proton\task\Event.java src\main\java\proton\exception\ProtonException.java src\main\java\proton\Proton.java`
 - Program launch command: `java -cp out proton.Proton`
-- Working directory: `E:\NUS\Academics\Year 2\CS2113\Individual_Project\ip`
+- Manual working directory: `E:\NUS\Academics\Year 2\CS2113\Individual_Project\ip`
 - Java version: 25 (verified using `java -version`)
 - Comparison: Exact complete stdout after normalizing CRLF/LF line endings
 - Failure policy: Stop immediately after the first failed test case
-- Preconditions: Start each case with a fresh Proton process and an empty in-memory task list
+- Automated Java launch: `java -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8 -cp <absolute out path> proton.Proton`
+- Automated runner: `python test/run_ui.py` (builds once with Java 25).
+- Test working directory: A fresh temporary directory under `_temp/` for each case; compiled classes use an absolute path.
+- Preconditions: Start each case with a fresh Proton process, an empty in-memory task list, and no data directory. This isolates tests from real saved tasks.
+- Save checks: UI-SAVE-01 checks exact UTF-8 file contents after every command response while the process remains running; `null` means the file must not exist. Normalize only line endings.
+- Scope: Saving only; startup loading is deferred. Each mutation overwrites `data/proton.txt` using one displayed task per line.
 
 ## Test cases
 
@@ -1265,13 +1270,109 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+
+### UI-SAVE-01: Save every task-list change immediately
+
+Aim: Verify directory creation, all task types, UTF-8 text, completion changes, overwrite after deletion, and an empty file after deleting the last task. Check before exit; list and bye do not change the file.
+
+Input:
+
+```text
+list
+todo café | book
+deadline submit /by Friday
+event meeting /from 2pm /to 4pm
+mark 2
+unmark 2
+delete 1
+delete 2
+delete 1
+bye
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] café | book
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [D][ ] submit (by: Friday)
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [E][ ] meeting (from: 2pm to: 4pm)
+ Now you have 3 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [D][X] submit (by: Friday)
+____________________________________________________________
+____________________________________________________________
+ OK, I've marked this task as not done yet:
+   [D][ ] submit (by: Friday)
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [T][ ] café | book
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [E][ ] meeting (from: 2pm to: 4pm)
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [D][ ] submit (by: Friday)
+ Now you have 0 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+Expected save file after each input line (JSON strings):
+
+```json
+[
+  null,
+  "[T][ ] café | book\n",
+  "[T][ ] café | book\n[D][ ] submit (by: Friday)\n",
+  "[T][ ] café | book\n[D][ ] submit (by: Friday)\n[E][ ] meeting (from: 2pm to: 4pm)\n",
+  "[T][ ] café | book\n[D][X] submit (by: Friday)\n[E][ ] meeting (from: 2pm to: 4pm)\n",
+  "[T][ ] café | book\n[D][ ] submit (by: Friday)\n[E][ ] meeting (from: 2pm to: 4pm)\n",
+  "[D][ ] submit (by: Friday)\n[E][ ] meeting (from: 2pm to: 4pm)\n",
+  "[D][ ] submit (by: Friday)\n",
+  "",
+  ""
+]
+```
+
 ## Latest test session
 
-Timestamp: 2026-09-16T03:14:30.832590+08:00
+Timestamp: 2026-09-16T03:30:36.312335+08:00
 
 Result: PASS
 
-Java: 25.0.4
+Java: java version "25.0.4" 2026-07-21 LTS
 
 ### UI-TODO-01: Add and manage a ToDo task
 
@@ -2582,4 +2683,102 @@ ____________________________________________________________
 Stderr:
 
 ```text
+```
+
+### UI-SAVE-01: Save every task-list change immediately
+
+PASS; exit code: 0
+
+Input:
+
+```text
+list
+todo café | book
+deadline submit /by Friday
+event meeting /from 2pm /to 4pm
+mark 2
+unmark 2
+delete 1
+delete 2
+delete 1
+bye
+```
+
+Actual stdout:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Here are the tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [T][ ] café | book
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [D][ ] submit (by: Friday)
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Got it. I've added this task:
+   [E][ ] meeting (from: 2pm to: 4pm)
+ Now you have 3 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Nice! I've marked this task as done:
+   [D][X] submit (by: Friday)
+____________________________________________________________
+____________________________________________________________
+ OK, I've marked this task as not done yet:
+   [D][ ] submit (by: Friday)
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [T][ ] café | book
+ Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [E][ ] meeting (from: 2pm to: 4pm)
+ Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Noted. I've removed this task:
+   [D][ ] submit (by: Friday)
+ Now you have 0 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+Stderr:
+
+```text
+```
+
+Save checks:
+
+```text
+list: PASS; save file = null
+todo café | book: PASS; save file = "[T][ ] café | book\n"
+deadline submit /by Friday: PASS; save file = "[T][ ] café | book\n[D][ ] submit (by: Friday)\n"
+event meeting /from 2pm /to 4pm: PASS; save file = "[T][ ] café | book\n[D][ ] submit (by: Friday)\n[E][ ] meeting (from: 2pm to: 4pm)\n"
+mark 2: PASS; save file = "[T][ ] café | book\n[D][X] submit (by: Friday)\n[E][ ] meeting (from: 2pm to: 4pm)\n"
+unmark 2: PASS; save file = "[T][ ] café | book\n[D][ ] submit (by: Friday)\n[E][ ] meeting (from: 2pm to: 4pm)\n"
+delete 1: PASS; save file = "[D][ ] submit (by: Friday)\n[E][ ] meeting (from: 2pm to: 4pm)\n"
+delete 2: PASS; save file = "[D][ ] submit (by: Friday)\n"
+delete 1: PASS; save file = ""
+bye: PASS; save file = ""
 ```
