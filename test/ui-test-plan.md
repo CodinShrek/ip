@@ -4,7 +4,7 @@ This file is maintained by the project-specific `$test-ui` skill.
 
 ## Test configuration
 
-- Program build command: `javac -d out src\main\java\proton\task\Task.java src\main\java\proton\task\TaskList.java src\main\java\proton\task\Todo.java src\main\java\proton\task\Deadline.java src\main\java\proton\task\Event.java src\main\java\proton\exception\ProtonException.java src\main\java\proton\storage\Storage.java src\main\java\proton\ui\Ui.java src\main\java\proton\parser\Parser.java src\main\java\proton\command\Command.java src\main\java\proton\command\ListCommand.java src\main\java\proton\command\ExitCommand.java src\main\java\proton\Proton.java`
+- Program build command: `javac --release 25 -d out <all Java files under src/main/java>`
 - Program launch command: `java -cp out proton.Proton`
 - Manual working directory: `E:\NUS\Academics\Year 2\CS2113\Individual_Project\ip`
 - Java version: 25 (verified using `java -version`)
@@ -38,6 +38,10 @@ parsing remains independent of execution and persistence.
 The first Command extraction moves list and exit behavior into executable
 classes. Existing cases cover empty and populated lists, farewell output, EOF,
 and unchanged save files for read-only commands.
+
+The find feature is covered with saved tasks of different types. Its case checks
+multiple matches in list order, description-only and case-sensitive matching,
+empty-keyword validation, and unchanged storage for this read-only command.
 
 ## Test cases
 
@@ -2491,9 +2495,70 @@ ____________________________________________________________
 ____________________________________________________________
 ```
 
+### UI-FIND-01: Find tasks by description keyword
+
+Aim: Verify that `find` searches task descriptions, preserves matching order, and requires a keyword.
+
+Input:
+
+```text
+find book
+find June
+find Book
+find
+bye
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Here are the matching tasks in your list:
+ 1.[T][ ] read book
+ 2.[D][X] return book (by: June 6th)
+____________________________________________________________
+____________________________________________________________
+ Here are the matching tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Here are the matching tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: find KEYWORD
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+Storage fixture and unchanged-file checks after every command:
+
+```json
+{
+  "initial_save": "[T][ ] read book\n[D][X] return book (by: June 6th)\n[T][ ] call mom\n",
+  "snapshots": [
+    "[T][ ] read book\n[D][X] return book (by: June 6th)\n[T][ ] call mom\n",
+    "[T][ ] read book\n[D][X] return book (by: June 6th)\n[T][ ] call mom\n",
+    "[T][ ] read book\n[D][X] return book (by: June 6th)\n[T][ ] call mom\n",
+    "[T][ ] read book\n[D][X] return book (by: June 6th)\n[T][ ] call mom\n",
+    "[T][ ] read book\n[D][X] return book (by: June 6th)\n[T][ ] call mom\n"
+  ]
+}
+```
+
 ## Latest test session
 
-Timestamp: 2026-09-28T21:24:15.853727+08:00
+Timestamp: 2026-09-28T21:36:23.034742+08:00
 
 Result: PASS
 
@@ -5087,4 +5152,65 @@ ____________________________________________________________
 Stderr:
 
 ```text
+```
+
+### UI-FIND-01: Find tasks by description keyword
+
+PASS; exit code: 0
+
+Input:
+
+```text
+find book
+find June
+find Book
+find
+bye
+```
+
+Actual stdout:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Here are the matching tasks in your list:
+ 1.[T][ ] read book
+ 2.[D][X] return book (by: June 6th)
+____________________________________________________________
+____________________________________________________________
+ Here are the matching tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Here are the matching tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Positive charge alert! Use: find KEYWORD
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+Stderr:
+
+```text
+```
+
+Save checks:
+
+```text
+find book: PASS; save file = "[T][ ] read book\n[D][X] return book (by: June 6th)\n[T][ ] call mom\n"
+find June: PASS; save file = "[T][ ] read book\n[D][X] return book (by: June 6th)\n[T][ ] call mom\n"
+find Book: PASS; save file = "[T][ ] read book\n[D][X] return book (by: June 6th)\n[T][ ] call mom\n"
+find: PASS; save file = "[T][ ] read book\n[D][X] return book (by: June 6th)\n[T][ ] call mom\n"
+bye: PASS; save file = "[T][ ] read book\n[D][X] return book (by: June 6th)\n[T][ ] call mom\n"
 ```
