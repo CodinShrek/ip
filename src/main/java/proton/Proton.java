@@ -5,12 +5,12 @@ import proton.storage.Storage;
 import proton.task.Deadline;
 import proton.task.Event;
 import proton.task.Task;
+import proton.task.TaskList;
 import proton.task.Todo;
 import proton.ui.Ui;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 
 /**
  * Runs the Proton chatbot and manages the user's task list.
@@ -36,7 +36,7 @@ public class Proton {
 
     private final Ui ui = new Ui();
     private final Storage storage = new Storage(Path.of("data", "proton.txt"));
-    private final ArrayList<Task> tasks = new ArrayList<>();
+    private TaskList tasks = new TaskList();
 
     /**
      * Starts Proton and processes commands from the standard input stream.
@@ -50,7 +50,7 @@ public class Proton {
     private void run() {
         try (ui) {
             try {
-                tasks.addAll(storage.load());
+                tasks = new TaskList(storage.load());
             } catch (IOException | IllegalArgumentException exception) {
                 ui.showWelcome();
                 ui.showLoadingError();
@@ -73,24 +73,12 @@ public class Proton {
      * Restores both list membership and completion flags when a command cannot be saved.
      */
     private boolean processCommand(String inputCommand) {
-        ArrayList<Task> previousTasks = new ArrayList<>(tasks);
-        ArrayList<Boolean> previousStatuses = new ArrayList<>();
-        for (Task task : tasks) {
-            previousStatuses.add(task.isDone());
-        }
+        TaskList.Snapshot previousTasks = tasks.createSnapshot();
 
         try {
             return executeCommand(inputCommand);
         } catch (ProtonException exception) {
-            tasks.clear();
-            tasks.addAll(previousTasks);
-            for (int i = 0; i < tasks.size(); i++) {
-                if (previousStatuses.get(i)) {
-                    tasks.get(i).markAsDone();
-                } else {
-                    tasks.get(i).markAsNotDone();
-                }
-            }
+            tasks.restore(previousTasks);
             ui.showError(exception.getMessage());
             return true;
         }
@@ -111,7 +99,7 @@ public class Proton {
         }
 
         if (inputCommand.equals(LIST_COMMAND)) {
-            ui.showTasks(tasks);
+            ui.showTasks(tasks.asList());
             return true;
         }
 
@@ -161,15 +149,13 @@ public class Proton {
     }
 
     private void markTask(String inputCommand) throws ProtonException {
-        Task task = tasks.get(getTaskIndexFromCommand(inputCommand, MARK_COMMAND));
-        task.markAsDone();
+        Task task = tasks.mark(getTaskNumberFromCommand(inputCommand, MARK_COMMAND));
         saveTasks();
         ui.showTaskMarked(task);
     }
 
     private void unmarkTask(String inputCommand) throws ProtonException {
-        Task task = tasks.get(getTaskIndexFromCommand(inputCommand, UNMARK_COMMAND));
-        task.markAsNotDone();
+        Task task = tasks.unmark(getTaskNumberFromCommand(inputCommand, UNMARK_COMMAND));
         saveTasks();
         ui.showTaskUnmarked(task);
     }
@@ -180,19 +166,18 @@ public class Proton {
      * @throws ProtonException If the command does not identify an existing task.
      */
     private void deleteTask(String inputCommand) throws ProtonException {
-        int taskIndex = getTaskIndexFromCommand(inputCommand, DELETE_COMMAND);
-        Task removedTask = tasks.remove(taskIndex);
+        Task removedTask = tasks.delete(getTaskNumberFromCommand(inputCommand, DELETE_COMMAND));
         saveTasks();
         ui.showTaskDeleted(removedTask, tasks.size());
     }
 
     /**
-     * Finds the zero-based index referenced by a command containing a one-based task number.
+     * Parses the one-based task number in a command; TaskList checks whether it exists.
      *
-     * @return The index of the matching task.
-     * @throws ProtonException If the command does not contain an existing task number.
+     * @return The task number supplied by the user.
+     * @throws ProtonException If the command does not contain an integer task number.
      */
-    private int getTaskIndexFromCommand(String inputCommand, String command) throws ProtonException {
+    private int getTaskNumberFromCommand(String inputCommand, String command) throws ProtonException {
         String taskNumberText = inputCommand.substring(command.length()).trim();
         if (taskNumberText.isBlank()) {
             throw new ProtonException(
@@ -200,18 +185,7 @@ public class Proton {
         }
 
         try {
-            int taskNumber = Integer.parseInt(taskNumberText);
-            if (tasks.isEmpty()) {
-                throw new ProtonException(
-                        "Positive charge alert! There are no tasks in Proton's orbit yet.");
-            }
-
-            if (taskNumber < 1 || taskNumber > tasks.size()) {
-                throw new ProtonException(
-                        "Positive charge alert! Choose a task number from 1 to " + tasks.size() + ".");
-            }
-
-            return taskNumber - 1;
+            return Integer.parseInt(taskNumberText);
         } catch (NumberFormatException exception) {
             throw new ProtonException(
                     "Positive charge alert! Use: " + command + " TASK_NUMBER");
@@ -275,7 +249,7 @@ public class Proton {
      */
     private void saveTasks() throws ProtonException {
         try {
-            storage.save(tasks);
+            storage.save(tasks.asList());
         } catch (IOException exception) {
             throw new ProtonException("Could not save data/proton.txt. No tasks were changed. "
                     + "Check the path and permissions, then retry or restart.");
