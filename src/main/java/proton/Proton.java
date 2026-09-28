@@ -2,6 +2,7 @@ package proton;
 
 import proton.command.Command;
 import proton.command.ExitCommand;
+import proton.command.FindCommand;
 import proton.command.ListCommand;
 import proton.exception.ProtonException;
 import proton.parser.Parser;
@@ -75,6 +76,8 @@ public class Proton {
             return executeCommand(new ExitCommand());
         case LIST:
             return executeCommand(new ListCommand());
+        case FIND:
+            return executeCommand(new FindCommand(command.getKeyword()));
         case MARK:
             markTask(command.getTaskNumber());
             break;

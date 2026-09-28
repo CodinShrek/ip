@@ -49,6 +49,19 @@ public class TaskList {
     }
 
     /**
+     * Returns tasks whose descriptions contain the given keyword, preserving list order.
+     */
+    public List<Task> find(String keyword) {
+        ArrayList<Task> matchingTasks = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.getDescription().contains(keyword)) {
+                matchingTasks.add(task);
+            }
+        }
+        return matchingTasks;
+    }
+
+    /**
      * Marks the task identified by a one-based number as done and returns it.
      *
      * @throws ProtonException If the number does not identify an existing task.
