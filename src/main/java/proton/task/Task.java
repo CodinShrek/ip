@@ -40,15 +40,30 @@ public class Task {
         isDone = false;
     }
 
+    /**
+     * Returns the task description prefixed by its completion status.
+     *
+     * @return The formatted task.
+     */
     @Override
     public String toString() {
         return "[" + getStatusIcon() + "] " + description;
     }
 
+    /**
+     * Returns the description of this task.
+     *
+     * @return The task description.
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Returns whether this task has been completed.
+     *
+     * @return {@code true} if the task is completed.
+     */
     public boolean isDone() {
         return isDone;
     }

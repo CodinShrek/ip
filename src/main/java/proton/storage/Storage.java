@@ -92,6 +92,13 @@ public class Storage {
         }
     }
 
+    /**
+     * Reads the save bytes while treating an absent file as an empty task list.
+     * Symbolic links are rejected so that writes cannot escape the expected storage path.
+     *
+     * @return The file bytes, or {@code null} when the save file does not exist.
+     * @throws IOException If the path exists but cannot be read safely.
+     */
     private byte[] readBytes() throws IOException {
         if (Files.isSymbolicLink(file) || Files.isSymbolicLink(file.getParent())) {
             throw new IOException("Symbolic links are not supported for task storage.");
@@ -106,6 +113,11 @@ public class Storage {
         }
     }
 
+    /**
+     * Formats a task as a versioned record with Base64-encoded text fields.
+     *
+     * @return The serialized task record without a line terminator.
+     */
     private String formatRecord(Task task) {
         String status = task.isDone() ? "1" : "0";
         String description = encode(task.getDescription());
@@ -119,6 +131,13 @@ public class Storage {
         return "T\t" + status + "\t" + description;
     }
 
+    /**
+     * Parses and validates one record from the versioned storage format.
+     *
+     * @return The task represented by the record.
+     * @throws IOException If an encoded text field is not valid UTF-8.
+     * @throws IllegalArgumentException If the record structure or field values are invalid.
+     */
     private Task parseRecord(String line) throws IOException {
         String[] fields = line.split("\t", -1);
         if (fields.length < 3 || !(fields[1].equals("0") || fields[1].equals("1"))) {
@@ -131,6 +150,12 @@ public class Storage {
         return createTask(fields[0], fields[1].equals("1"), details);
     }
 
+    /**
+     * Parses an unambiguous task from the legacy display-based storage format.
+     *
+     * @return The task represented by the legacy record.
+     * @throws IllegalArgumentException If the record is malformed or its fields are ambiguous.
+     */
     private Task parseLegacy(String line) {
         Matcher matcher = Pattern.compile("\\[([TDE])\\]\\[([ X])\\] (.+)").matcher(line);
         if (!matcher.matches()) {
@@ -159,6 +184,12 @@ public class Storage {
         return createTask(type, matcher.group(2).equals("X"), fields);
     }
 
+    /**
+     * Validates decoded fields and creates the task subtype identified by a storage type code.
+     *
+     * @return The restored task with its saved completion status.
+     * @throws IllegalArgumentException If the type, field count, or field contents are invalid.
+     */
     private Task createTask(String type, boolean isDone, String[] fields) {
         for (String field : fields) {
             if (field.isBlank() || field.chars().anyMatch(value -> Character.isISOControl(value) && value != '\t')) {
@@ -181,10 +212,18 @@ public class Storage {
         return task;
     }
 
+    /**
+     * Encodes a text field as Base64 using UTF-8 bytes.
+     */
     private String encode(String field) {
         return Base64.getEncoder().encodeToString(field.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Decodes UTF-8 bytes strictly so malformed save data is rejected.
+     *
+     * @throws IOException If the bytes are not valid UTF-8.
+     */
     private String decode(byte[] bytes) throws IOException {
         return StandardCharsets.UTF_8.newDecoder().decode(ByteBuffer.wrap(bytes)).toString();
     }

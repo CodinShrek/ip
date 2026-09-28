@@ -33,6 +33,9 @@ public class Proton {
         new Proton().run();
     }
 
+    /**
+     * Loads saved tasks, displays the greeting, and processes commands until exit or end of input.
+     */
     private void run() {
         try (ui) {
             try {
@@ -70,6 +73,12 @@ public class Proton {
         }
     }
 
+    /**
+     * Dispatches a parsed operation to the corresponding application behavior.
+     *
+     * @return {@code false} when the command requests exit; {@code true} otherwise.
+     * @throws ProtonException If the requested operation cannot be completed.
+     */
     private boolean executeCommand(ParsedCommand command) throws ProtonException {
         switch (command.getType()) {
         case BYE:
@@ -104,12 +113,22 @@ public class Proton {
         return !command.isExit();
     }
 
+    /**
+     * Marks and saves the selected task before displaying confirmation.
+     *
+     * @throws ProtonException If the task does not exist or the change cannot be saved.
+     */
     private void markTask(int taskNumber) throws ProtonException {
         Task task = tasks.mark(taskNumber);
         saveTasks();
         ui.showTaskMarked(task);
     }
 
+    /**
+     * Unmarks and saves the selected task before displaying confirmation.
+     *
+     * @throws ProtonException If the task does not exist or the change cannot be saved.
+     */
     private void unmarkTask(int taskNumber) throws ProtonException {
         Task task = tasks.unmark(taskNumber);
         saveTasks();
@@ -127,6 +146,11 @@ public class Proton {
         ui.showTaskDeleted(removedTask, tasks.size());
     }
 
+    /**
+     * Adds and saves a task before displaying confirmation and the updated count.
+     *
+     * @throws ProtonException If the change cannot be saved.
+     */
     private void addTask(Task task) throws ProtonException {
         tasks.add(task);
         saveTasks();

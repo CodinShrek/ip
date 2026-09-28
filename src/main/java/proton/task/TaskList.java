@@ -139,6 +139,9 @@ public class TaskList {
         private final List<Task> tasks;
         private final List<Boolean> completionStatuses = new ArrayList<>();
 
+        /**
+         * Copies the current membership, order, and completion flags for later restoration.
+         */
         private Snapshot(List<Task> tasks) {
             this.tasks = new ArrayList<>(tasks);
             for (Task task : tasks) {
