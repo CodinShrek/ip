@@ -4,7 +4,7 @@ This file is maintained by the project-specific `$test-ui` skill.
 
 ## Test configuration
 
-- Program build command: `javac -d out src\main\java\proton\task\Task.java src\main\java\proton\task\TaskList.java src\main\java\proton\task\Todo.java src\main\java\proton\task\Deadline.java src\main\java\proton\task\Event.java src\main\java\proton\exception\ProtonException.java src\main\java\proton\storage\Storage.java src\main\java\proton\ui\Ui.java src\main\java\proton\Proton.java`
+- Program build command: `javac -d out src\main\java\proton\task\Task.java src\main\java\proton\task\TaskList.java src\main\java\proton\task\Todo.java src\main\java\proton\task\Deadline.java src\main\java\proton\task\Event.java src\main\java\proton\exception\ProtonException.java src\main\java\proton\storage\Storage.java src\main\java\proton\ui\Ui.java src\main\java\proton\parser\Parser.java src\main\java\proton\Proton.java`
 - Program launch command: `java -cp out proton.Proton`
 - Manual working directory: `E:\NUS\Academics\Year 2\CS2113\Individual_Project\ip`
 - Java version: 25 (verified using `java -version`)
@@ -30,6 +30,10 @@ The TaskList extraction also preserves the recorded cases. Run the full suite
 to verify list growth, one-based task validation, deletion and renumbering,
 loaded task order, and restoration of membership and completion flags after
 failed additions, deletions, marking, and unmarking.
+
+The Parser extraction preserves command recognition, argument validation, error
+precedence, whitespace, and delimiter behavior. Run all cases to verify that
+parsing remains independent of execution and persistence.
 
 ## Test cases
 
@@ -2455,7 +2459,7 @@ Storage configuration:
 
 ## Latest test session
 
-Timestamp: 2026-09-28T21:07:59.106433+08:00
+Timestamp: 2026-09-28T21:14:10.527401+08:00
 
 Result: PASS
 
