@@ -27,6 +27,11 @@ public class Deadline extends Task {
         return "[D]" + super.toString() + " (by: " + dueDateTime + ")";
     }
 
+    /**
+     * Returns the date or time by which this task should be completed.
+     *
+     * @return The deadline date or time.
+     */
     public String getDueDateTime() {
         return dueDateTime;
     }

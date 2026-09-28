@@ -77,6 +77,11 @@ public class Parser {
                 "Positive charge alert! That command is outside Proton's orbit.");
     }
 
+    /**
+     * Extracts and validates the keyword from a find command.
+     *
+     * @throws ProtonException If the keyword is blank.
+     */
     private String parseKeyword(String inputCommand) throws ProtonException {
         String keyword = inputCommand.substring(FIND_COMMAND.length()).trim();
         if (keyword.isBlank()) {
@@ -108,6 +113,11 @@ public class Parser {
         }
     }
 
+    /**
+     * Creates a ToDo task from a command containing a non-blank description.
+     *
+     * @throws ProtonException If the description is blank.
+     */
     private Task parseTodo(String inputCommand) throws ProtonException {
         String description = inputCommand.substring(TODO_COMMAND.length()).trim();
         if (description.isBlank()) {
@@ -118,6 +128,11 @@ public class Parser {
         return new Todo(description);
     }
 
+    /**
+     * Creates a deadline task from its description and {@code /by} fields.
+     *
+     * @throws ProtonException If either required field is absent or blank.
+     */
     private Task parseDeadline(String inputCommand) throws ProtonException {
         String deadlineDetails = inputCommand.substring(DEADLINE_COMMAND.length()).trim();
         String[] deadlineParts = deadlineDetails.split(DEADLINE_DELIMITER, 2);
@@ -131,6 +146,11 @@ public class Parser {
         return new Deadline(deadlineParts[0], deadlineParts[1]);
     }
 
+    /**
+     * Creates an event task from its description, {@code /from}, and {@code /to} fields.
+     *
+     * @throws ProtonException If any required field is absent or blank.
+     */
     private Task parseEvent(String inputCommand) throws ProtonException {
         String eventDetails = inputCommand.substring(EVENT_COMMAND.length()).trim();
         String[] descriptionAndTimes = eventDetails.split(EVENT_START_DELIMITER, 2);
@@ -178,18 +198,38 @@ public class Parser {
             this.keyword = keyword;
         }
 
+        /**
+         * Returns the operation selected by the command keyword.
+         *
+         * @return The parsed operation type.
+         */
         public CommandType getType() {
             return type;
         }
 
+        /**
+         * Returns the one-based task number for a task-selection operation.
+         *
+         * @return The parsed task number, or zero when the operation does not use one.
+         */
         public int getTaskNumber() {
             return taskNumber;
         }
 
+        /**
+         * Returns the task created by an add operation.
+         *
+         * @return The parsed task, or {@code null} when the operation does not add one.
+         */
         public Task getTask() {
             return task;
         }
 
+        /**
+         * Returns the search keyword for a find operation.
+         *
+         * @return The parsed keyword, or {@code null} when the operation does not search.
+         */
         public String getKeyword() {
             return keyword;
         }

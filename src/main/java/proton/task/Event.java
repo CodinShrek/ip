@@ -31,10 +31,20 @@ public class Event extends Task {
                 + " (from: " + startDateTime + " to: " + endDateTime + ")";
     }
 
+    /**
+     * Returns the date or time at which this event starts.
+     *
+     * @return The event's start date or time.
+     */
     public String getStartDateTime() {
         return startDateTime;
     }
 
+    /**
+     * Returns the date or time at which this event ends.
+     *
+     * @return The event's end date or time.
+     */
     public String getEndDateTime() {
         return endDateTime;
     }

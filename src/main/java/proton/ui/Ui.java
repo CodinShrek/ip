@@ -87,6 +87,9 @@ public class Ui implements AutoCloseable {
         showNumberedTasks(tasks);
     }
 
+    /**
+     * Displays the supplied tasks with one-based numbers in their current order.
+     */
     private void showNumberedTasks(List<Task> tasks) {
         for (int i = 0; i < tasks.size(); i++) {
             System.out.println(" " + (i + 1) + "." + tasks.get(i));
