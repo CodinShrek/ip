@@ -6,22 +6,16 @@ import proton.task.Deadline;
 import proton.task.Event;
 import proton.task.Task;
 import proton.task.Todo;
+import proton.ui.Ui;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 /**
  * Runs the Proton chatbot and manages the user's task list.
  */
 public class Proton {
-    private static final String BANNER = " ____            _              \n"
-            + "|  _ \\ _ __ ___ | |_ ___  _ __ \n"
-            + "| |_) | '__/ _ \\| __/ _ \\| '_ \\\n"
-            + "|  __/| | | (_) | || (_) | | | |\n"
-            + "|_|   |_|  \\___/ \\__\\___/|_| |_|\n";
-    private static final String SEPARATOR = "____________________________________________________________";
     private static final String BYE_COMMAND = "bye";
     private static final String LIST_COMMAND = "list";
     private static final String MARK_COMMAND = "mark";
@@ -40,6 +34,7 @@ public class Proton {
     private static final String EVENT_START_DELIMITER = " /from ";
     private static final String EVENT_END_DELIMITER = " /to ";
 
+    private final Ui ui = new Ui();
     private final Storage storage = new Storage(Path.of("data", "proton.txt"));
     private final ArrayList<Task> tasks = new ArrayList<>();
 
@@ -53,33 +48,25 @@ public class Proton {
     }
 
     private void run() {
-        try {
-            tasks.addAll(storage.load());
-        } catch (IOException | IllegalArgumentException exception) {
-            printWelcomeMessage();
-            System.out.println(" Proton could not load data/proton.txt. Check the file and restart.");
-            return;
+        try (ui) {
+            try {
+                tasks.addAll(storage.load());
+            } catch (IOException | IllegalArgumentException exception) {
+                ui.showWelcome();
+                ui.showLoadingError();
+                return;
+            }
+            ui.showWelcome();
+
+            boolean shouldContinue = true;
+            while (shouldContinue && ui.hasNextCommand()) {
+                String inputCommand = ui.readCommand();
+
+                ui.showSeparator();
+                shouldContinue = processCommand(inputCommand);
+                ui.showSeparator();
+            }
         }
-        printWelcomeMessage();
-
-        Scanner scanner = new Scanner(System.in);
-        boolean shouldContinue = true;
-        while (shouldContinue && scanner.hasNextLine()) {
-            String inputCommand = scanner.nextLine();
-
-            System.out.println(SEPARATOR);
-            shouldContinue = processCommand(inputCommand);
-            System.out.println(SEPARATOR);
-        }
-        scanner.close();
-    }
-
-    private void printWelcomeMessage() {
-        System.out.println(BANNER);
-        System.out.println(SEPARATOR);
-        System.out.println("Hey there! I'm Proton, your positively charged chatbot!");
-        System.out.println("I'm fired up and ready to help! What awesome thing shall we tackle today?");
-        System.out.println(SEPARATOR);
     }
 
     /**
@@ -104,7 +91,7 @@ public class Proton {
                     tasks.get(i).markAsNotDone();
                 }
             }
-            System.out.println(" " + exception.getMessage());
+            ui.showError(exception.getMessage());
             return true;
         }
     }
@@ -119,12 +106,12 @@ public class Proton {
         }
 
         if (inputCommand.equals(BYE_COMMAND)) {
-            System.out.println(" Powering down for now, I'll see you next time!");
+            ui.showGoodbye();
             return false;
         }
 
         if (inputCommand.equals(LIST_COMMAND)) {
-            listTasks();
+            ui.showTasks(tasks);
             return true;
         }
 
@@ -173,27 +160,18 @@ public class Proton {
                 "Positive charge alert! That command is outside Proton's orbit.");
     }
 
-    private void listTasks() {
-        System.out.println(" Here are the tasks in your list:");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println(" " + (i + 1) + "." + tasks.get(i));
-        }
-    }
-
     private void markTask(String inputCommand) throws ProtonException {
         Task task = tasks.get(getTaskIndexFromCommand(inputCommand, MARK_COMMAND));
         task.markAsDone();
         saveTasks();
-        System.out.println(" Nice! I've marked this task as done:");
-        System.out.println("   " + task);
+        ui.showTaskMarked(task);
     }
 
     private void unmarkTask(String inputCommand) throws ProtonException {
         Task task = tasks.get(getTaskIndexFromCommand(inputCommand, UNMARK_COMMAND));
         task.markAsNotDone();
         saveTasks();
-        System.out.println(" OK, I've marked this task as not done yet:");
-        System.out.println("   " + task);
+        ui.showTaskUnmarked(task);
     }
 
     /**
@@ -205,9 +183,7 @@ public class Proton {
         int taskIndex = getTaskIndexFromCommand(inputCommand, DELETE_COMMAND);
         Task removedTask = tasks.remove(taskIndex);
         saveTasks();
-        System.out.println(" Noted. I've removed this task:");
-        System.out.println("   " + removedTask);
-        System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
+        ui.showTaskDeleted(removedTask, tasks.size());
     }
 
     /**
@@ -289,9 +265,7 @@ public class Proton {
         tasks.add(task);
         saveTasks();
 
-        System.out.println(" Got it. I've added this task:");
-        System.out.println("   " + task);
-        System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
+        ui.showTaskAdded(task, tasks.size());
     }
 
     /**

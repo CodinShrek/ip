@@ -4,7 +4,7 @@ This file is maintained by the project-specific `$test-ui` skill.
 
 ## Test configuration
 
-- Program build command: `javac -d out src\main\java\proton\task\Task.java src\main\java\proton\task\Todo.java src\main\java\proton\task\Deadline.java src\main\java\proton\task\Event.java src\main\java\proton\exception\ProtonException.java src\main\java\proton\storage\Storage.java src\main\java\proton\Proton.java`
+- Program build command: `javac -d out src\main\java\proton\task\Task.java src\main\java\proton\task\Todo.java src\main\java\proton\task\Deadline.java src\main\java\proton\task\Event.java src\main\java\proton\exception\ProtonException.java src\main\java\proton\storage\Storage.java src\main\java\proton\ui\Ui.java src\main\java\proton\Proton.java`
 - Program launch command: `java -cp out proton.Proton`
 - Manual working directory: `E:\NUS\Academics\Year 2\CS2113\Individual_Project\ip`
 - Java version: 25 (verified using `java -version`)
@@ -19,6 +19,12 @@ This file is maintained by the project-specific `$test-ui` skill.
 - Control-input notation: input_text is the exact JSON-decoded input; the transcript displays NUL as `\u0000` to keep this Markdown file readable.
 - Failure fixtures: initial_hex supplies raw bytes; directory_save creates a directory at the save path; preserve_bytes verifies byte preservation. Per-command actions block/unblock the save path or replace it externally after startup. All fixture actions stay in the isolated temporary directory.
 - Scope: Load tasks on startup and save after each mutation. JSON objects can specify initial_save, per-command snapshots, unchanged_save, and restart_expected. Restart checks launch a second process in the same isolated directory with exactly `list` and `bye`; compare its entire stdout, stderr, and exit code.
+
+## Refactoring coverage
+
+The Ui extraction preserves all recorded inputs and expected outputs. Run the full
+suite to cover greetings, task responses, errors, separators, Unicode, and EOF,
+including save failures where success messages must not be displayed.
 
 ## Test cases
 
@@ -2444,7 +2450,7 @@ Storage configuration:
 
 ## Latest test session
 
-Timestamp: 2026-09-16T03:51:51.811652+08:00
+Timestamp: 2026-09-28T20:57:59.604678+08:00
 
 Result: PASS
 
