@@ -1,5 +1,8 @@
 package proton;
 
+import proton.command.Command;
+import proton.command.ExitCommand;
+import proton.command.ListCommand;
 import proton.exception.ProtonException;
 import proton.parser.Parser;
 import proton.parser.Parser.ParsedCommand;
@@ -69,11 +72,9 @@ public class Proton {
     private boolean executeCommand(ParsedCommand command) throws ProtonException {
         switch (command.getType()) {
         case BYE:
-            ui.showGoodbye();
-            return false;
+            return executeCommand(new ExitCommand());
         case LIST:
-            ui.showTasks(tasks.asList());
-            break;
+            return executeCommand(new ListCommand());
         case MARK:
             markTask(command.getTaskNumber());
             break;
@@ -90,6 +91,14 @@ public class Proton {
             throw new IllegalStateException("Unhandled command type: " + command.getType());
         }
         return true;
+    }
+
+    /**
+     * Runs an extracted command and translates its exit request for the loop.
+     */
+    private boolean executeCommand(Command command) throws ProtonException {
+        command.execute(tasks, ui, storage);
+        return !command.isExit();
     }
 
     private void markTask(int taskNumber) throws ProtonException {

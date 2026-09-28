@@ -4,7 +4,7 @@ This file is maintained by the project-specific `$test-ui` skill.
 
 ## Test configuration
 
-- Program build command: `javac -d out src\main\java\proton\task\Task.java src\main\java\proton\task\TaskList.java src\main\java\proton\task\Todo.java src\main\java\proton\task\Deadline.java src\main\java\proton\task\Event.java src\main\java\proton\exception\ProtonException.java src\main\java\proton\storage\Storage.java src\main\java\proton\ui\Ui.java src\main\java\proton\parser\Parser.java src\main\java\proton\Proton.java`
+- Program build command: `javac -d out src\main\java\proton\task\Task.java src\main\java\proton\task\TaskList.java src\main\java\proton\task\Todo.java src\main\java\proton\task\Deadline.java src\main\java\proton\task\Event.java src\main\java\proton\exception\ProtonException.java src\main\java\proton\storage\Storage.java src\main\java\proton\ui\Ui.java src\main\java\proton\parser\Parser.java src\main\java\proton\command\Command.java src\main\java\proton\command\ListCommand.java src\main\java\proton\command\ExitCommand.java src\main\java\proton\Proton.java`
 - Program launch command: `java -cp out proton.Proton`
 - Manual working directory: `E:\NUS\Academics\Year 2\CS2113\Individual_Project\ip`
 - Java version: 25 (verified using `java -version`)
@@ -34,6 +34,10 @@ failed additions, deletions, marking, and unmarking.
 The Parser extraction preserves command recognition, argument validation, error
 precedence, whitespace, and delimiter behavior. Run all cases to verify that
 parsing remains independent of execution and persistence.
+
+The first Command extraction moves list and exit behavior into executable
+classes. Existing cases cover empty and populated lists, farewell output, EOF,
+and unchanged save files for read-only commands.
 
 ## Test cases
 
@@ -2457,9 +2461,39 @@ Storage configuration:
 }
 ```
 
+### UI-EXIT-01: Stop before commands after bye
+
+Aim: Verify that exit displays its response and ignores later input.
+
+Input:
+
+```text
+bye
+todo ignored
+list
+```
+
+Expected output:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
 ## Latest test session
 
-Timestamp: 2026-09-28T21:14:10.527401+08:00
+Timestamp: 2026-09-28T21:24:15.853727+08:00
 
 Result: PASS
 
@@ -5009,6 +5043,41 @@ ____________________________________________________________
 ____________________________________________________________
 ____________________________________________________________
  Here are the tasks in your list:
+____________________________________________________________
+____________________________________________________________
+ Powering down for now, I'll see you next time!
+____________________________________________________________
+```
+
+Stderr:
+
+```text
+```
+
+### UI-EXIT-01: Stop before commands after bye
+
+PASS; exit code: 0
+
+Input:
+
+```text
+bye
+todo ignored
+list
+```
+
+Actual stdout:
+
+```text
+ ____            _              
+|  _ \ _ __ ___ | |_ ___  _ __ 
+| |_) | '__/ _ \| __/ _ \| '_ \
+|  __/| | | (_) | || (_) | | | |
+|_|   |_|  \___/ \__\___/|_| |_|
+
+____________________________________________________________
+Hey there! I'm Proton, your positively charged chatbot!
+I'm fired up and ready to help! What awesome thing shall we tackle today?
 ____________________________________________________________
 ____________________________________________________________
  Powering down for now, I'll see you next time!
